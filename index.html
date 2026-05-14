@@ -115,7 +115,7 @@ button{
   font-weight:900;
 }
 
-/* 地圖固定 16:9，手機與電腦共用同一個座標系 */
+/* 你的地圖是 2:1，不是 16:9 */
 .map-wrap{
   position:relative;
   width:100vw;
@@ -128,9 +128,9 @@ button{
 
 .map-stage{
   position:relative;
-  width:min(100vw, calc(100dvh * 16 / 9));
-  height:min(100dvh, calc(100vw * 9 / 16));
-  aspect-ratio:16 / 9;
+  width:min(100vw, calc(100dvh * 2));
+  height:min(100dvh, calc(100vw / 2));
+  aspect-ratio:2 / 1;
   flex:none;
   line-height:0;
 }
@@ -142,7 +142,6 @@ button{
   object-fit:contain;
 }
 
-/* 地圖點位 */
 .hotspot{
   position:absolute;
   z-index:10;
@@ -436,7 +435,6 @@ button{
   50%{box-shadow:0 0 28px rgba(255,220,120,.95),0 16px 36px rgba(0,0,0,.7);}
 }
 
-/* 手機直式 */
 @media (max-width:1024px) and (orientation:portrait){
   .page{display:none!important;}
 
@@ -457,7 +455,7 @@ button{
   }
 }
 
-/* 手機橫式：只縮小尺寸，不改地圖座標 */
+/* 手機橫式：只縮小尺寸，不改座標 */
 @media (max-width:1024px) and (orientation:landscape){
 
   .start-btn{
@@ -508,11 +506,22 @@ button{
     top:86%;
   }
 
-  .map-name{font-size:13px;}
-  .map-date{font-size:10px;margin-top:2px;}
+  .map-name{
+    font-size:13px;
+  }
 
-  .mother-event .map-name,.grass-event .map-name{font-size:10px;}
-  .mother-event .map-date,.grass-event .map-date{font-size:8px;}
+  .map-date{
+    font-size:10px;
+    margin-top:2px;
+  }
+
+  .mother-event .map-name,.grass-event .map-name{
+    font-size:10px;
+  }
+
+  .mother-event .map-date,.grass-event .map-date{
+    font-size:8px;
+  }
 
   .map-label{
     width:120px;
