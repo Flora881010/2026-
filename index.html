@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="preload" as="image" href="cover.png">
 <link rel="preload" as="image" href="grass-map.png">
-
 <title>冒險地圖活動</title>
 
 <style>
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
@@ -65,8 +62,7 @@ button{
   animation:magicGlow 1.8s infinite;
 }
 
-.back-btn,
-.close-btn{
+.back-btn,.close-btn{
   padding:12px 32px;
   font-size:22px;
   font-weight:900;
@@ -119,6 +115,7 @@ button{
   font-weight:900;
 }
 
+/* 地圖固定 16:9，手機與電腦共用同一個座標系 */
 .map-wrap{
   position:relative;
   width:100vw;
@@ -145,6 +142,7 @@ button{
   object-fit:contain;
 }
 
+/* 地圖點位 */
 .hotspot{
   position:absolute;
   z-index:10;
@@ -216,8 +214,7 @@ button{
   z-index:15;
 }
 
-.mother-event::before,
-.grass-event::before{
+.mother-event::before,.grass-event::before{
   content:"";
   position:absolute;
   left:50%;
@@ -231,8 +228,7 @@ button{
   animation:none;
 }
 
-.mother-event::after,
-.grass-event::after{
+.mother-event::after,.grass-event::after{
   content:"";
   position:absolute;
   left:50%;
@@ -265,13 +261,11 @@ button{
   color:#d9ffbf;
 }
 
-.mother-event .map-name,
-.grass-event .map-name{
+.mother-event .map-name,.grass-event .map-name{
   font-size:16px;
 }
 
-.mother-event .map-date,
-.grass-event .map-date{
+.mother-event .map-date,.grass-event .map-date{
   font-size:12px;
   margin-top:2px;
 }
@@ -297,6 +291,7 @@ button{
   top:77%;
 }
 
+/* 任務頁 */
 .quest-bg{
   position:fixed;
   inset:0;
@@ -369,8 +364,7 @@ button{
   color:#496f34;
 }
 
-.task-card p,
-.task-card li{
+.task-card p,.task-card li{
   font-size:32px;
   font-weight:900;
   line-height:1.8;
@@ -396,9 +390,7 @@ button{
   border-radius:999px;
 }
 
-.reward strong{
-  color:#b12c1d;
-}
+.reward strong{color:#b12c1d;}
 
 .popup{
   position:fixed;
@@ -432,9 +424,7 @@ button{
   color:#2c1a0b;
 }
 
-.popup strong{
-  color:#b12c1d;
-}
+.popup strong{color:#b12c1d;}
 
 @keyframes glow{
   from{transform:translate(-50%,-50%) scale(.85);opacity:.65;}
@@ -446,6 +436,7 @@ button{
   50%{box-shadow:0 0 28px rgba(255,220,120,.95),0 16px 36px rgba(0,0,0,.7);}
 }
 
+/* 手機直式 */
 @media (max-width:1024px) and (orientation:portrait){
   .page{display:none!important;}
 
@@ -466,7 +457,9 @@ button{
   }
 }
 
+/* 手機橫式：只縮小尺寸，不改地圖座標 */
 @media (max-width:1024px) and (orientation:landscape){
+
   .start-btn{
     bottom:6%;
     font-size:18px;
@@ -491,29 +484,21 @@ button{
   #countdown{font-size:14px;}
 
   .grass{
-    width:78px!important;
-    height:78px!important;
+    width:78px;
+    height:78px;
   }
 
-  .hotspot{
-    width:58px;
-    height:58px;
+  .mother-event,.grass-event{
+    width:38px;
+    height:38px;
   }
 
-  .mother-event,
-  .grass-event{
-    width:38px!important;
-    height:38px!important;
-  }
-
-  .mother-event::before,
-  .grass-event::before{
+  .mother-event::before,.grass-event::before{
     width:4px;
     height:24px;
   }
 
-  .mother-event::after,
-  .grass-event::after{
+  .mother-event::after,.grass-event::after{
     width:20px;
     height:12px;
   }
@@ -526,13 +511,12 @@ button{
   .map-name{font-size:13px;}
   .map-date{font-size:10px;margin-top:2px;}
 
-  .mother-event .map-name,
-  .grass-event .map-name{font-size:10px;}
+  .mother-event .map-name,.grass-event .map-name{font-size:10px;}
+  .mother-event .map-date,.grass-event .map-date{font-size:8px;}
 
-  .mother-event .map-date,
-  .grass-event .map-date{font-size:8px;}
-
-  .map-label{width:120px;}
+  .map-label{
+    width:120px;
+  }
 
   .quest-menu{
     left:50%;
@@ -576,8 +560,7 @@ button{
     letter-spacing:3px;
   }
 
-  .task-card p,
-  .task-card li{
+  .task-card p,.task-card li{
     font-size:16px;
     line-height:1.45;
   }
@@ -622,10 +605,7 @@ button{
 
 <div class="page" id="landing">
   <img class="full-img" src="cover.png" alt="活動封面">
-
-  <button class="start-btn" onclick="goMap()">
-    冒險開始
-  </button>
+  <button class="start-btn" onclick="goMap()">冒險開始</button>
 </div>
 
 <div class="page hidden" id="mapPage">
@@ -670,9 +650,7 @@ button{
       <div id="countdown">計算中...</div>
     </div>
 
-    <button class="back-btn" onclick="backHome()">
-      返回首頁
-    </button>
+    <button class="back-btn" onclick="backHome()">返回首頁</button>
   </div>
 </div>
 
@@ -685,24 +663,13 @@ button{
     <h1>草原地圖｜任務選擇</h1>
 
     <div class="quest-options">
-      <button class="quest-option" onclick="showTask('personal')">
-        個人冒險賽
-      </button>
-
-      <button class="quest-option" onclick="showTask('department')">
-        地圖推進<br>
-        部室加碼獎
-      </button>
-
-      <button class="quest-option" onclick="showTask('alliance')">
-        聯盟挑戰賽
-      </button>
+      <button class="quest-option" onclick="showTask('personal')">個人冒險賽</button>
+      <button class="quest-option" onclick="showTask('department')">地圖推進<br>部室加碼獎</button>
+      <button class="quest-option" onclick="showTask('alliance')">聯盟挑戰賽</button>
     </div>
   </div>
 
-  <button class="back-btn" onclick="backToMap()">
-    返回冒險地圖
-  </button>
+  <button class="back-btn" onclick="backToMap()">返回冒險地圖</button>
 </div>
 
 <div class="page hidden" id="taskPage">
@@ -713,33 +680,27 @@ button{
   <div class="task-card">
     <h1 id="taskTitle"></h1>
     <div id="taskContent"></div>
-
-    <button class="close-btn" onclick="backToGrassMenu()">
-      返回任務選擇
-    </button>
+    <button class="close-btn" onclick="backToGrassMenu()">返回任務選擇</button>
   </div>
 </div>
 
 <div class="popup hidden" id="popup">
   <h2 id="popupTitle"></h2>
   <p id="popupText"></p>
-
-  <button class="close-btn" onclick="closePopup()">
-    關閉
-  </button>
+  <button class="close-btn" onclick="closePopup()">關閉</button>
 </div>
 
 <script>
-const landing = document.getElementById("landing");
-const mapPage = document.getElementById("mapPage");
-const grassMenuPage = document.getElementById("grassMenuPage");
-const taskPage = document.getElementById("taskPage");
-const popup = document.getElementById("popup");
+const landing=document.getElementById("landing");
+const mapPage=document.getElementById("mapPage");
+const grassMenuPage=document.getElementById("grassMenuPage");
+const taskPage=document.getElementById("taskPage");
+const popup=document.getElementById("popup");
 
-const popupTitle = document.getElementById("popupTitle");
-const popupText = document.getElementById("popupText");
-const taskTitle = document.getElementById("taskTitle");
-const taskContent = document.getElementById("taskContent");
+const popupTitle=document.getElementById("popupTitle");
+const popupText=document.getElementById("popupText");
+const taskTitle=document.getElementById("taskTitle");
+const taskContent=document.getElementById("taskContent");
 
 function hideAll(){
   landing.classList.add("hidden");
@@ -778,69 +739,57 @@ function showTask(type){
   hideAll();
   taskPage.classList.remove("hidden");
 
-  if(type === "personal"){
-    taskTitle.textContent = "個人冒險賽";
-    taskContent.innerHTML = `
+  if(type==="personal"){
+    taskTitle.textContent="個人冒險賽";
+    taskContent.innerHTML=`
       <p>累積 20 萬步以上</p>
-      <div class="reward">
-        即可獲得 <strong>200 元獎勵金</strong>
-      </div>
+      <div class="reward">即可獲得 <strong>200 元獎勵金</strong></div>
     `;
   }
 
-  if(type === "department"){
-    taskTitle.textContent = "地圖推進部室加碼獎";
-    taskContent.innerHTML = `
+  if(type==="department"){
+    taskTitle.textContent="地圖推進部室加碼獎";
+    taskContent.innerHTML=`
       <p>完成部室達標率</p>
-      <div class="reward">
-        該部室達標的勇者即可獲得 <strong>400 元獎勵金</strong>
-      </div>
+      <div class="reward">該部室達標的勇者即可獲得 <strong>400 元獎勵金</strong></div>
     `;
   }
 
-  if(type === "alliance"){
-    taskTitle.textContent = "聯盟挑戰賽";
-    taskContent.innerHTML = `
+  if(type==="alliance"){
+    taskTitle.textContent="聯盟挑戰賽";
+    taskContent.innerHTML=`
       <ul>
         <li>該聯盟每人每日平均 1 萬步以上</li>
         <li>且排名前 4 名</li>
       </ul>
-      <div class="reward">
-        該聯盟每位勇者即可獲得 <strong>200 元獎勵金</strong>
-      </div>
+      <div class="reward">該聯盟每位勇者即可獲得 <strong>200 元獎勵金</strong></div>
     `;
   }
 }
 
 function showMotherEvent(){
-  popupTitle.textContent = "母親節快閃活動（已結束）";
-
-  popupText.innerHTML =
-    "母親節（05/10）當天<br>" +
-    "步數達 <strong>15,520 步</strong><br>" +
+  popupTitle.textContent="母親節快閃活動（已結束）";
+  popupText.innerHTML=
+    "母親節（05/10）當天<br>"+
+    "步數達 <strong>15,520 步</strong><br>"+
     "即可獲得 <strong>100 元獎勵金</strong>";
-
   popup.classList.remove("hidden");
 }
 
 function showGrassEvent(){
-  popupTitle.textContent = "草原地圖快閃活動";
-
-  popupText.innerHTML =
-    "前往任一公園、綠地或戶外草地空間進行步行活動，<br>" +
-    "且自拍一張照片上傳至 Forms<br>" +
+  popupTitle.textContent="草原地圖快閃活動";
+  popupText.innerHTML=
+    "前往任一公園、綠地或戶外草地空間進行步行活動，<br>"+
+    "且自拍一張照片上傳至 Forms<br>"+
     "即可獲得 <strong>100 元獎勵金</strong>";
-
   popup.classList.remove("hidden");
 }
 
 function showLocked(name){
-  popupTitle.textContent = name + " 尚未開啟";
-
-  popupText.innerHTML =
-    "此區域仍被迷霧覆蓋。<br>" +
+  popupTitle.textContent=name+" 尚未開啟";
+  popupText.innerHTML=
+    "此區域仍被迷霧覆蓋。<br>"+
     "請等待下一階段冒險開放！";
-
   popup.classList.remove("hidden");
 }
 
@@ -848,24 +797,24 @@ function closePopup(){
   popup.classList.add("hidden");
 }
 
-const countdown = document.getElementById("countdown");
-const eventEndTime = new Date("2026-05-21T23:59:59").getTime();
+const countdown=document.getElementById("countdown");
+const eventEndTime=new Date("2026-05-21T23:59:59").getTime();
 
 function updateCountdown(){
-  const now = new Date().getTime();
-  const distance = eventEndTime - now;
+  const now=new Date().getTime();
+  const distance=eventEndTime-now;
 
-  if(distance <= 0){
-    countdown.textContent = "活動已結束";
+  if(distance<=0){
+    countdown.textContent="活動已結束";
     return;
   }
 
-  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  const days=Math.floor(distance/(1000*60*60*24));
+  const hours=Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+  const minutes=Math.floor((distance%(1000*60*60))/(1000*60));
+  const seconds=Math.floor((distance%(1000*60))/1000);
 
-  countdown.textContent = `${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
+  countdown.textContent=`${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
 }
 
 setInterval(updateCountdown,1000);
