@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 圖片預載 -->
+<link rel="preload" as="image" href="cover.png">
+<link rel="preload" as="image" href="grass-map.png">
+
 <title>冒險地圖活動</title>
 
 <style>
@@ -16,12 +21,19 @@ body{
   font-family:"Microsoft JhengHei",sans-serif;
 }
 
-.hidden{ display:none !important; }
+.hidden{
+  display:none !important;
+}
 
 .page{
   position:fixed;
   inset:0;
   background:#000;
+}
+
+/* 手機橫向提示 */
+.rotate-tip{
+  display:none;
 }
 
 .full-img{
@@ -57,7 +69,9 @@ button{
   animation:magicGlow 1.8s infinite;
 }
 
-.start-btn:hover{ transform:translateX(-50%) scale(1.05); }
+.start-btn:hover{
+  transform:translateX(-50%) scale(1.05);
+}
 
 /* 共用按鈕 */
 .back-btn,
@@ -395,7 +409,6 @@ button{
   border-radius:999px;
 }
 
-/* 讓任務圖卡的獎勵金額變紅色 */
 .reward strong{
   color:#b12c1d;
 }
@@ -432,6 +445,30 @@ button{
 
 .popup strong{
   color:#b12c1d;
+}
+
+/* 手機版橫向提示 */
+@media (max-width:768px) and (orientation:portrait){
+
+  .page{
+    display:none !important;
+  }
+
+  .rotate-tip{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:32px;
+    background:#14221c;
+    color:#fff6c9;
+    font-size:28px;
+    font-weight:900;
+    line-height:1.8;
+  }
 }
 
 /* 動畫 */
@@ -564,6 +601,12 @@ button{
 </head>
 
 <body>
+
+<!-- 手機橫向提示 -->
+<div class="rotate-tip">
+  請將手機橫向觀看<br>
+  以獲得最佳冒險體驗
+</div>
 
 <div class="page" id="landing">
   <img class="full-img" src="cover.png" alt="活動封面">
