@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 圖片預載 -->
 <link rel="preload" as="image" href="cover.png">
 <link rel="preload" as="image" href="grass-map.png">
 
@@ -21,9 +20,7 @@ body{
   font-family:"Microsoft JhengHei",sans-serif;
 }
 
-.hidden{
-  display:none !important;
-}
+.hidden{ display:none !important; }
 
 .page{
   position:fixed;
@@ -31,7 +28,6 @@ body{
   background:#000;
 }
 
-/* 手機橫向提示 */
 .rotate-tip{
   display:none;
 }
@@ -69,9 +65,7 @@ button{
   animation:magicGlow 1.8s infinite;
 }
 
-.start-btn:hover{
-  transform:translateX(-50%) scale(1.05);
-}
+.start-btn:hover{ transform:translateX(-50%) scale(1.05); }
 
 /* 共用按鈕 */
 .back-btn,
@@ -141,14 +135,16 @@ button{
 
 .map-stage{
   position:relative;
-  display:inline-block;
+  width:min(100vw,177.78vh);
+  height:min(56.25vw,100vh);
   line-height:0;
 }
 
 .map-img{
   display:block;
-  max-width:100vw;
-  max-height:100vh;
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
 
 /* 光點 */
@@ -157,6 +153,7 @@ button{
   z-index:10;
   background:transparent;
   transform:translate(-50%,-50%);
+  pointer-events:auto;
 }
 
 .hotspot::before{
@@ -409,6 +406,7 @@ button{
   border-radius:999px;
 }
 
+/* 讓任務圖卡的獎勵金額變紅色 */
 .reward strong{
   color:#b12c1d;
 }
@@ -447,30 +445,6 @@ button{
   color:#b12c1d;
 }
 
-/* 手機版橫向提示 */
-@media (max-width:768px) and (orientation:portrait){
-
-  .page{
-    display:none !important;
-  }
-
-  .rotate-tip{
-    position:fixed;
-    inset:0;
-    z-index:9999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:32px;
-    background:#14221c;
-    color:#fff6c9;
-    font-size:28px;
-    font-weight:900;
-    line-height:1.8;
-  }
-}
-
 /* 動畫 */
 @keyframes glow{
   from{
@@ -491,6 +465,30 @@ button{
 
   50%{
     box-shadow:0 0 28px rgba(255,220,120,.95),0 16px 36px rgba(0,0,0,.7);
+  }
+}
+
+/* 手機直式提示 */
+@media (max-width:768px) and (orientation:portrait){
+
+  .page{
+    display:none !important;
+  }
+
+  .rotate-tip{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    text-align:center;
+    line-height:1.8;
+    background:#14221c;
+    color:#fff6c9;
+    font-size:28px;
+    font-weight:900;
   }
 }
 
@@ -597,12 +595,158 @@ button{
     font-size:22px;
   }
 }
+
+/* 手機橫向優化 */
+@media (max-width:900px) and (orientation:landscape){
+
+  .start-btn{
+    bottom:6%;
+    font-size:18px;
+    padding:10px 28px;
+  }
+
+  .back-btn{
+    bottom:2%;
+    font-size:14px;
+    padding:8px 20px;
+  }
+
+  .countdown-box{
+    right:2%;
+    top:2%;
+    padding:6px 10px;
+  }
+
+  .countdown-title{
+    font-size:12px;
+  }
+
+  #countdown{
+    font-size:14px;
+  }
+
+  .hotspot{
+    width:58px !important;
+    height:58px !important;
+  }
+
+  .grass{
+    width:90px !important;
+    height:90px !important;
+  }
+
+  .hotspot span{
+    width:120px;
+    top:82%;
+  }
+
+  .map-name{
+    font-size:13px;
+  }
+
+  .map-date{
+    font-size:10px;
+    margin-top:2px;
+  }
+
+  .mother-event,
+  .grass-event{
+    width:42px !important;
+    height:42px !important;
+  }
+
+  .mother-event::before,
+  .grass-event::before{
+    width:4px;
+    height:26px;
+  }
+
+  .mother-event::after,
+  .grass-event::after{
+    width:22px;
+    height:13px;
+  }
+
+  .mother-event .map-name,
+  .grass-event .map-name{
+    font-size:11px;
+  }
+
+  .mother-event .map-date,
+  .grass-event .map-date{
+    font-size:9px;
+  }
+
+  .quest-menu{
+    width:82vw;
+  }
+
+  .quest-menu h1{
+    font-size:28px;
+    margin-bottom:18px;
+  }
+
+  .quest-options{
+    gap:12px;
+  }
+
+  .quest-option{
+    min-height:90px;
+    padding:14px 10px;
+    font-size:18px;
+  }
+
+  .task-card{
+    width:78vw;
+    max-height:78vh;
+    overflow:auto;
+    padding:28px 28px 24px;
+  }
+
+  .task-card h1{
+    font-size:30px;
+    margin-bottom:14px;
+  }
+
+  .task-card p,
+  .task-card li{
+    font-size:18px;
+    line-height:1.5;
+  }
+
+  .reward{
+    margin-top:16px;
+    padding:12px 20px;
+    font-size:18px;
+  }
+
+  .popup{
+    width:72vw;
+    max-height:78vh;
+    overflow:auto;
+    padding:24px;
+  }
+
+  .popup h2{
+    font-size:28px;
+  }
+
+  .popup p{
+    font-size:18px;
+    line-height:1.5;
+  }
+
+  .close-btn{
+    margin-top:16px;
+    font-size:14px;
+    padding:8px 20px;
+  }
+}
 </style>
 </head>
 
 <body>
 
-<!-- 手機橫向提示 -->
 <div class="rotate-tip">
   請將手機橫向觀看<br>
   以獲得最佳冒險體驗
