@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 圖片預載 -->
+<link rel="preload" as="image" href="cover.png">
+<link rel="preload" as="image" href="grass-map.png">
+
+<title>冒險地圖活動</title>
+
+<style>
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  font-family:"Microsoft JhengHei",sans-serif;
+}
+
+.hidden{
+  display:none !important;
+}
+
+.page{
+  position:fixed;
+  inset:0;
+  background:#000;
+}
+
+/* 手機橫向提示 */
+.rotate-tip{
+  display:none;
+}
+
+.full-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+button{
+  font-family:inherit;
+  cursor:pointer;
+  border:none;
+}
+
+/* 首頁 */
+.start-btn{
+  position:absolute;
+  left:50%;
+  bottom:8%;
+  transform:translateX(-50%);
+  z-index:20;
+  padding:16px 48px;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:4px;
+  color:#fff6c9;
+  background:linear-gradient(180deg,#b88a3b 0%,#6f5226 100%);
+  border:3px solid #e7cf86;
+  border-radius:999px;
+  text-shadow:0 3px 0 #000;
+  box-shadow:0 0 16px rgba(255,220,120,.5),0 10px 24px rgba(0,0,0,.55);
+  animation:magicGlow 1.8s infinite;
+}
+
+.start-btn:hover{
+  transform:translateX(-50%) scale(1.05);
+}
+
+/* 共用按鈕 */
+.back-btn,
+.close-btn{
+  padding:12px 32px;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:3px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#7f9443 0%,#415425 100%);
+  border:3px solid #d7c57a;
+  border-radius:999px;
+  box-shadow:0 0 16px rgba(255,220,120,.35),0 10px 24px rgba(0,0,0,.45);
+  text-shadow:0 2px 0 #000;
+}
+
+.back-btn{
+  position:absolute;
+  left:50%;
+  bottom:4%;
+  transform:translateX(-50%);
+  z-index:20;
+}
+
+.close-btn{
+  position:relative;
+  z-index:2;
+  margin-top:30px;
+}
+
+/* 倒數 */
+.countdown-box{
+  position:absolute;
+  right:8%;
+  top:5%;
+  z-index:25;
+  padding:12px 20px;
+  text-align:center;
+  color:#fff6c9;
+  background:rgba(25,40,34,.88);
+  border:3px solid #d7c57a;
+  border-radius:18px;
+  box-shadow:0 0 16px rgba(0,0,0,.45),0 8px 18px rgba(0,0,0,.45);
+  text-shadow:0 2px 0 #000;
+}
+
+.countdown-title{
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+#countdown{
+  font-size:24px;
+  font-weight:900;
+}
+
+/* 地圖 */
+.map-wrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.map-stage{
+  position:relative;
+  display:inline-block;
+  line-height:0;
+}
+
+.map-img{
+  display:block;
+  max-width:100vw;
+  max-height:100vh;
+}
+
+/* 光點 */
+.hotspot{
+  position:absolute;
+  z-index:10;
+  background:transparent;
+  transform:translate(-50%,-50%);
+}
+
+.hotspot::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:42%;
+  height:42%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(0,245,255,1),rgba(0,180,255,.45),transparent 72%);
+  box-shadow:0 0 18px rgba(0,245,255,.85),0 0 40px rgba(0,180,255,.6);
+  animation:glow 1.5s infinite alternate;
+}
+
+.hotspot span{
+  position:absolute;
+  left:50%;
+  top:82%;
+  width:180px;
+  transform:translateX(-50%);
+  text-align:center;
+  white-space:nowrap;
+  color:#fff;
+  text-shadow:0 3px 0 #000,0 0 8px rgba(255,255,255,.35),0 4px 10px rgba(0,0,0,.8);
+}
+
+.map-name{
+  display:block;
+  font-size:24px;
+  font-weight:900;
+}
+
+.map-date{
+  display:block;
+  margin-top:6px;
+  font-size:18px;
+  font-weight:900;
+}
+
+/* 草原地圖 */
+.grass{
+  left:20.4%;
+  top:51%;
+  width:130px;
+  height:130px;
+}
+
+/* 母親節快閃 */
+.mother-event{
+  left:34%;
+  top:58%;
+  width:60px;
+  height:60px;
+  z-index:15;
+}
+
+.mother-event::before,
+.grass-event::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:20%;
+  width:5px;
+  height:40px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,#6a5134,#2c1e10);
+  border-radius:4px;
+  box-shadow:0 3px 5px rgba(0,0,0,.4);
+  animation:none;
+}
+
+.mother-event::after,
+.grass-event::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:18%;
+  width:34px;
+  height:20px;
+  transform:translateX(2px);
+  clip-path:polygon(0 0,100% 0,80% 50%,100% 100%,0 100%);
+  border-radius:3px 0 0 3px;
+  box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 1px 2px rgba(255,255,255,.3);
+}
+
+.mother-event::after{
+  background:linear-gradient(135deg,#ff7272 0%,#b51f1f 100%);
+}
+
+.mother-event span{
+  top:92%;
+  width:120px;
+  color:#ffc0cb;
+}
+
+.mother-event .map-name,
+.grass-event .map-name{
+  font-size:16px;
+}
+
+.mother-event .map-date,
+.grass-event .map-date{
+  font-size:12px;
+  margin-top:2px;
+}
+
+/* 草原快閃 */
+.grass-event{
+  left:24%;
+  top:78%;
+  width:60px;
+  height:60px;
+  z-index:15;
+}
+
+.grass-event::after{
+  background:linear-gradient(135deg,#7cff72 0%,#1f8b2c 100%);
+}
+
+.grass-event span{
+  top:92%;
+  width:160px;
+  color:#d9ffbf;
+}
+
+/* 第二第三地圖 */
+.map-label{
+  position:absolute;
+  z-index:12;
+  width:180px;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  background:transparent;
+  color:#111;
+  text-shadow:0 1px 0 rgba(255,255,255,.6),0 2px 4px rgba(255,255,255,.35);
+}
+
+.third-label{
+  left:79.4%;
+  top:54%;
+}
+
+.second-label{
+  left:48.6%;
+  top:77%;
+}
+
+/* 任務頁 */
+.quest-bg{
+  position:fixed;
+  inset:0;
+}
+
+.quest-bg img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.5;
+  filter:brightness(.65);
+}
+
+.quest-menu{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:min(980px,88vw);
+  transform:translate(-50%,-50%);
+  text-align:center;
+}
+
+.quest-menu h1{
+  margin:0 0 36px;
+  font-size:56px;
+  letter-spacing:8px;
+  color:#fff;
+  text-shadow:0 4px 0 #4b2a10,0 8px 18px rgba(0,0,0,.75);
+}
+
+.quest-options{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+
+.quest-option{
+  min-height:190px;
+  padding:28px 18px;
+  background:rgba(246,225,175,.96);
+  border:4px double #3a230c;
+  box-shadow:0 16px 36px rgba(0,0,0,.55),inset 0 0 28px rgba(116,71,22,.25);
+  font-size:30px;
+  font-weight:900;
+  line-height:1.35;
+  color:#6f1d1d;
+  transition:.25s;
+}
+
+.quest-option:hover{
+  transform:translateY(-8px) scale(1.04);
+}
+
+/* 任務卡 */
+.task-card{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:min(900px,86vw);
+  transform:translate(-50%,-50%);
+  padding:72px 56px 46px;
+  text-align:center;
+  background:linear-gradient(180deg,rgba(248,235,197,.98),rgba(241,223,177,.98));
+  border:4px solid #7c5a2d;
+  border-radius:28px;
+  box-shadow:0 20px 48px rgba(0,0,0,.55),inset 0 0 24px rgba(140,100,40,.18);
+}
+
+.task-card h1{
+  margin:0 0 30px;
+  font-size:60px;
+  letter-spacing:6px;
+  color:#496f34;
+}
+
+.task-card p,
+.task-card li{
+  font-size:32px;
+  font-weight:900;
+  line-height:1.8;
+  color:#1d1207;
+}
+
+.task-card ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.reward{
+  margin:34px auto 0;
+  padding:20px 34px;
+  width:fit-content;
+  max-width:100%;
+  font-size:34px;
+  font-weight:900;
+  line-height:1.6;
+  color:#6a3911;
+  background:linear-gradient(180deg,#f6e8ae,#e3c96d);
+  border-radius:999px;
+}
+
+.reward strong{
+  color:#b12c1d;
+}
+
+/* popup */
+.popup{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:min(720px,82vw);
+  transform:translate(-50%,-50%);
+  z-index:30;
+  padding:42px;
+  text-align:center;
+  background:linear-gradient(180deg,rgba(252,243,214,.98),rgba(237,220,178,.98));
+  border:4px solid #7c5a2d;
+  border-radius:20px;
+  box-shadow:0 18px 42px rgba(0,0,0,.55);
+}
+
+.popup h2{
+  margin:0 0 18px;
+  font-size:46px;
+  color:#496f34;
+}
+
+.popup p{
+  margin:0;
+  font-size:28px;
+  font-weight:900;
+  line-height:1.8;
+  color:#2c1a0b;
+}
+
+.popup strong{
+  color:#b12c1d;
+}
+
+/* 手機版橫向提示 */
+@media (max-width:768px) and (orientation:portrait){
+
+  .page{
+    display:none !important;
+  }
+
+  .rotate-tip{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:32px;
+    background:#14221c;
+    color:#fff6c9;
+    font-size:28px;
+    font-weight:900;
+    line-height:1.8;
+  }
+}
+
+/* 動畫 */
+@keyframes glow{
+  from{
+    transform:translate(-50%,-50%) scale(.85);
+    opacity:.65;
+  }
+
+  to{
+    transform:translate(-50%,-50%) scale(1.18);
+    opacity:1;
+  }
+}
+
+@keyframes magicGlow{
+  0%,100%{
+    box-shadow:0 0 12px rgba(255,220,120,.45),0 10px 24px rgba(0,0,0,.55);
+  }
+
+  50%{
+    box-shadow:0 0 28px rgba(255,220,120,.95),0 16px 36px rgba(0,0,0,.7);
+  }
+}
+
+/* 手機版 */
+@media (max-width:768px){
+
+  .hotspot{
+    width:80px !important;
+    height:80px !important;
+  }
+
+  .hotspot span{
+    top:78%;
+  }
+
+  .mother-event{
+    left:38.2%;
+    top:53.5%;
+    width:42px;
+    height:42px;
+    z-index:15;
+  }
+
+  .grass-event{
+    left:31%;
+    top:41%;
+    width:42px;
+    height:42px;
+    z-index:15;
+  }
+
+  .mother-event::before,
+  .grass-event::before{
+    width:4px;
+    height:28px;
+  }
+
+  .mother-event::after,
+  .grass-event::after{
+    width:20px;
+    height:12px;
+  }
+
+  .mother-event .map-name,
+  .grass-event .map-name{
+    font-size:12px;
+  }
+
+  .mother-event .map-date,
+  .grass-event .map-date{
+    font-size:10px;
+  }
+
+  .map-name{
+    font-size:16px;
+  }
+
+  .map-date{
+    font-size:13px;
+  }
+
+  .start-btn,
+  .back-btn,
+  .close-btn{
+    font-size:18px;
+    padding:12px 28px;
+  }
+
+  .quest-options{
+    grid-template-columns:1fr;
+  }
+
+  .quest-menu h1{
+    font-size:36px;
+  }
+
+  .quest-option{
+    min-height:110px;
+    font-size:24px;
+  }
+
+  .task-card{
+    padding:54px 24px 34px;
+  }
+
+  .task-card h1{
+    font-size:38px;
+  }
+
+  .task-card p,
+  .task-card li{
+    font-size:22px;
+  }
+
+  .reward{
+    font-size:22px;
+  }
+
+  .popup h2{
+    font-size:34px;
+  }
+
+  .popup p{
+    font-size:22px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 手機橫向提示 -->
+<div class="rotate-tip">
+  請將手機橫向觀看<br>
+  以獲得最佳冒險體驗
+</div>
+
+<div class="page" id="landing">
+  <img class="full-img" src="cover.png" alt="活動封面">
+
+  <button class="start-btn" onclick="goMap()">
+    冒險開始
+  </button>
+</div>
+
+<div class="page hidden" id="mapPage">
+  <div class="map-wrap">
+    <div class="map-stage">
+      <img class="map-img" src="grass-map.png" alt="冒險地圖">
+
+      <button class="hotspot grass" onclick="goGrassMenu()">
+        <span>
+          <strong class="map-name">草原地圖</strong>
+          <em class="map-date">05/01~05/21</em>
+        </span>
+      </button>
+
+      <button class="hotspot grass-event" onclick="showGrassEvent()">
+        <span>
+          <strong class="map-name">草原快閃</strong>
+          <em class="map-date">05/14~05/21</em>
+        </span>
+      </button>
+
+      <button class="hotspot mother-event" onclick="showMotherEvent()">
+        <span>
+          <strong class="map-name">母親節快閃</strong>
+          <em class="map-date">05/10</em>
+        </span>
+      </button>
+
+      <button class="map-label third-label" onclick="showLocked('第三地圖')">
+        <strong class="map-name">第三地圖</strong>
+        <em class="map-date">06/11~06/30</em>
+      </button>
+
+      <button class="map-label second-label" onclick="showLocked('第二地圖')">
+        <strong class="map-name">第二地圖</strong>
+        <em class="map-date">05/22~06/10</em>
+      </button>
+    </div>
+
+    <div class="countdown-box">
+      <div class="countdown-title">草原地圖剩餘時間</div>
+      <div id="countdown">計算中...</div>
+    </div>
+
+    <button class="back-btn" onclick="backHome()">
+      返回首頁
+    </button>
+  </div>
+</div>
+
+<div class="page hidden" id="grassMenuPage">
+  <div class="quest-bg">
+    <img src="grass-map.png" alt="">
+  </div>
+
+  <div class="quest-menu">
+    <h1>草原地圖｜任務選擇</h1>
+
+    <div class="quest-options">
+      <button class="quest-option" onclick="showTask('personal')">
+        個人冒險賽
+      </button>
+
+      <button class="quest-option" onclick="showTask('department')">
+        地圖推進<br>
+        部室加碼獎
+      </button>
+
+      <button class="quest-option" onclick="showTask('alliance')">
+        聯盟挑戰賽
+      </button>
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="backToMap()">
+    返回冒險地圖
+  </button>
+</div>
+
+<div class="page hidden" id="taskPage">
+  <div class="quest-bg">
+    <img src="grass-map.png" alt="">
+  </div>
+
+  <div class="task-card">
+    <h1 id="taskTitle"></h1>
+    <div id="taskContent"></div>
+
+    <button class="close-btn" onclick="backToGrassMenu()">
+      返回任務選擇
+    </button>
+  </div>
+</div>
+
+<div class="popup hidden" id="popup">
+  <h2 id="popupTitle"></h2>
+  <p id="popupText"></p>
+
+  <button class="close-btn" onclick="closePopup()">
+    關閉
+  </button>
+</div>
+
+<script>
+const landing = document.getElementById("landing");
+const mapPage = document.getElementById("mapPage");
+const grassMenuPage = document.getElementById("grassMenuPage");
+const taskPage = document.getElementById("taskPage");
+const popup = document.getElementById("popup");
+
+const popupTitle = document.getElementById("popupTitle");
+const popupText = document.getElementById("popupText");
+const taskTitle = document.getElementById("taskTitle");
+const taskContent = document.getElementById("taskContent");
+
+function hideAll(){
+  landing.classList.add("hidden");
+  mapPage.classList.add("hidden");
+  grassMenuPage.classList.add("hidden");
+  taskPage.classList.add("hidden");
+  popup.classList.add("hidden");
+}
+
+function goMap(){
+  hideAll();
+  mapPage.classList.remove("hidden");
+}
+
+function backHome(){
+  hideAll();
+  landing.classList.remove("hidden");
+}
+
+function backToMap(){
+  hideAll();
+  mapPage.classList.remove("hidden");
+}
+
+function goGrassMenu(){
+  hideAll();
+  grassMenuPage.classList.remove("hidden");
+}
+
+function backToGrassMenu(){
+  hideAll();
+  grassMenuPage.classList.remove("hidden");
+}
+
+function showTask(type){
+  hideAll();
+  taskPage.classList.remove("hidden");
+
+  if(type === "personal"){
+    taskTitle.textContent = "個人冒險賽";
+    taskContent.innerHTML = `
+      <p>累積 20 萬步以上</p>
+      <div class="reward">
+        即可獲得 <strong>200 元獎勵金</strong>
+      </div>
+    `;
+  }
+
+  if(type === "department"){
+    taskTitle.textContent = "地圖推進部室加碼獎";
+    taskContent.innerHTML = `
+      <p>完成部室達標率</p>
+      <div class="reward">
+        該部室達標的勇者即可獲得 <strong>400 元獎勵金</strong>
+      </div>
+    `;
+  }
+
+  if(type === "alliance"){
+    taskTitle.textContent = "聯盟挑戰賽";
+    taskContent.innerHTML = `
+      <ul>
+        <li>該聯盟每人每日平均 1 萬步以上</li>
+        <li>且排名前 4 名</li>
+      </ul>
+      <div class="reward">
+        該聯盟每位勇者即可獲得 <strong>200 元獎勵金</strong>
+      </div>
+    `;
+  }
+}
+
+function showMotherEvent(){
+  popupTitle.textContent = "母親節快閃活動（已結束）";
+
+  popupText.innerHTML =
+    "母親節（05/10）當天<br>" +
+    "步數達 <strong>15,520 步</strong><br>" +
+    "即可獲得 <strong>100 元獎勵金</strong>";
+
+  popup.classList.remove("hidden");
+}
+
+function showGrassEvent(){
+  popupTitle.textContent = "草原地圖快閃活動";
+
+  popupText.innerHTML =
+    "前往任一公園、綠地或戶外草地空間進行步行活動，<br>" +
+    "且自拍一張照片上傳至 Forms<br>" +
+    "即可獲得 <strong>100 元獎勵金</strong>";
+
+  popup.classList.remove("hidden");
+}
+
+function showLocked(name){
+  popupTitle.textContent = name + " 尚未開啟";
+
+  popupText.innerHTML =
+    "此區域仍被迷霧覆蓋。<br>" +
+    "請等待下一階段冒險開放！";
+
+  popup.classList.remove("hidden");
+}
+
+function closePopup(){
+  popup.classList.add("hidden");
+}
+
+/* 倒數 */
+const countdown = document.getElementById("countdown");
+const eventEndTime = new Date("2026-05-21T23:59:59").getTime();
+
+function updateCountdown(){
+  const now = new Date().getTime();
+  const distance = eventEndTime - now;
+
+  if(distance <= 0){
+    countdown.textContent = "活動已結束";
+    return;
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  countdown.textContent = `${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
+}
+
+setInterval(updateCountdown,1000);
+updateCountdown();
+</script>
+
+</body>
+</html>
