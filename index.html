@@ -1,23 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preload" as="image" href="cover.png">
-<link rel="preload" as="image" href="grass-map.png">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preload" as="image" href="cover.png" />
+<link rel="preload" as="image" href="grass-map.png" />
 <title>冒險地圖活動</title>
 
 <style>
+:root{
+  --gold:#f7d56a;
+  --gold-2:#fff2b7;
+  --dark:#11170f;
+  --panel:#f4dfac;
+  --brown:#5b3514;
+  --green:#526f34;
+  --danger:#b12c1d;
+  --cyan:#00eaff;
+}
+
+*{box-sizing:border-box}
+
 html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
   background:#000;
-  font-family:"Microsoft JhengHei",sans-serif;
+  font-family:"Microsoft JhengHei",system-ui,sans-serif;
+  user-select:none;
 }
 
-.hidden{display:none!important;}
+.hidden{display:none!important}
 
 .page{
   position:fixed;
@@ -28,95 +42,162 @@ html,body{
   background:#000;
 }
 
-.rotate-tip{display:none;}
+button{
+  font-family:inherit;
+  cursor:pointer;
+  border:none;
+  -webkit-tap-highlight-color:transparent;
+}
 
+/* 共用：淡入切頁 */
+.page:not(.hidden){
+  animation:pageIn .45s ease both;
+}
+
+/* 背景粒子 */
+.particles{
+  pointer-events:none;
+  position:absolute;
+  inset:0;
+  z-index:3;
+  overflow:hidden;
+}
+
+.particles i{
+  position:absolute;
+  bottom:-24px;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,231,129,.75);
+  box-shadow:0 0 16px rgba(255,231,129,.9);
+  animation:floatUp linear infinite;
+}
+
+/* 首頁 */
 #landing .full-img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
   background:#000;
+  filter:saturate(1.05) contrast(1.03);
 }
 
-button{
-  font-family:inherit;
-  cursor:pointer;
-  border:none;
+.landing-vignette{
+  pointer-events:none;
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:
+    radial-gradient(circle at 50% 45%, transparent 35%, rgba(0,0,0,.35) 72%, rgba(0,0,0,.82) 100%);
 }
 
 .start-btn{
   position:absolute;
   left:50%;
   bottom:8%;
-  transform:translateX(-50%);
   z-index:20;
-  padding:16px 48px;
+  transform:translateX(-50%);
+  padding:16px 54px 18px;
   font-size:28px;
   font-weight:900;
-  letter-spacing:4px;
+  letter-spacing:5px;
   color:#fff6c9;
-  background:linear-gradient(180deg,#b88a3b 0%,#6f5226 100%);
-  border:3px solid #e7cf86;
+  background:linear-gradient(180deg,#d49d3e 0%,#6f5226 100%);
+  border:3px solid #ffe59a;
   border-radius:999px;
   text-shadow:0 3px 0 #000;
-  box-shadow:0 0 16px rgba(255,220,120,.5),0 10px 24px rgba(0,0,0,.55);
-  animation:magicGlow 1.8s infinite;
+  box-shadow:0 0 18px rgba(255,220,120,.55),0 12px 0 #3e2b13,0 18px 32px rgba(0,0,0,.62);
+  animation:magicGlow 1.7s infinite, startBounce 2.4s ease-in-out infinite;
 }
 
-.back-btn,.close-btn{
-  padding:12px 32px;
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:3px;
+.start-btn::after{
+  content:"點擊進入地圖";
+  position:absolute;
+  left:50%;
+  top:calc(100% + 16px);
+  transform:translateX(-50%);
+  width:max-content;
+  font-size:14px;
+  letter-spacing:2px;
+  color:rgba(255,255,255,.86);
+  text-shadow:0 2px 6px #000;
+}
+
+.start-btn:hover{filter:brightness(1.08)}
+.start-btn:active{transform:translateX(-50%) translateY(8px);box-shadow:0 0 12px rgba(255,220,120,.55),0 5px 0 #3e2b13,0 12px 24px rgba(0,0,0,.62)}
+
+/* HUD */
+.hud{
+  position:absolute;
+  left:7%;
+  top:4.8%;
+  z-index:70;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:12px 16px;
   color:#fff8da;
-  background:linear-gradient(180deg,#7f9443 0%,#415425 100%);
-  border:3px solid #d7c57a;
-  border-radius:999px;
-  box-shadow:0 0 16px rgba(255,220,120,.35),0 10px 24px rgba(0,0,0,.45);
+  background:rgba(17,28,20,.88);
+  border:3px solid rgba(247,213,106,.9);
+  border-radius:20px;
+  box-shadow:0 10px 24px rgba(0,0,0,.45), inset 0 0 18px rgba(255,220,120,.12);
   text-shadow:0 2px 0 #000;
 }
 
-.back-btn{
-  position:absolute;
-  left:50%;
-  bottom:4%;
-  transform:translateX(-50%);
-  z-index:80;
+.avatar{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:16px;
+  background:linear-gradient(180deg,#ffe99f,#aa7426);
+  border:2px solid #fff0b6;
+  font-size:28px;
+  box-shadow:0 0 18px rgba(255,220,120,.45);
 }
 
-.close-btn{
-  position:relative;
-  z-index:2;
-  margin-top:30px;
+.hud-title{font-size:14px;font-weight:900;opacity:.86}
+.hud-level{margin-top:2px;font-size:22px;font-weight:900;letter-spacing:1px}
+
+.progress-shell{
+  width:180px;
+  height:12px;
+  margin-top:8px;
+  border-radius:999px;
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.2);
+  overflow:hidden;
+}
+
+.progress-fill{
+  width:42%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#78ff85,#f7d56a);
+  box-shadow:0 0 12px rgba(120,255,133,.8);
 }
 
 .countdown-box{
   position:absolute;
-  right:8%;
-  top:5%;
+  right:7%;
+  top:4.8%;
   z-index:70;
   padding:12px 20px;
   text-align:center;
   color:#fff6c9;
-  background:rgba(25,40,34,.88);
+  background:rgba(25,40,34,.9);
   border:3px solid #d7c57a;
   border-radius:18px;
   box-shadow:0 0 16px rgba(0,0,0,.45),0 8px 18px rgba(0,0,0,.45);
   text-shadow:0 2px 0 #000;
 }
 
-.countdown-title{
-  font-size:16px;
-  font-weight:900;
-  margin-bottom:6px;
-}
+.countdown-title{font-size:16px;font-weight:900;margin-bottom:6px}
+#countdown{font-size:24px;font-weight:900}
 
-#countdown{
-  font-size:24px;
-  font-weight:900;
-}
-
-/* 你的地圖是 2:1，不是 16:9 */
+/* 地圖 */
 .map-wrap{
   position:relative;
   width:100vw;
@@ -125,6 +206,7 @@ button{
   align-items:center;
   justify-content:center;
   overflow:hidden;
+  background:radial-gradient(circle at 50% 45%,#22331f,#050705 70%);
 }
 
 .map-stage{
@@ -132,18 +214,33 @@ button{
   width:min(100vw, calc(100dvh * 2));
   height:min(100dvh, calc(100vw / 2));
   aspect-ratio:2 / 1;
-  flex:none;
-  line-height:0;
+  animation:mapEnter .7s cubic-bezier(.2,1,.25,1) both;
 }
 
 .map-img{
-  display:block;
   width:100%;
   height:100%;
   object-fit:contain;
+  display:block;
+  filter:saturate(1.08) contrast(1.04) drop-shadow(0 22px 32px rgba(0,0,0,.55));
 }
 
-.hotspot{
+.map-path{
+  pointer-events:none;
+  position:absolute;
+  left:28%;
+  top:51%;
+  width:19%;
+  height:17%;
+  border-top:5px dashed rgba(255,235,150,.72);
+  border-radius:50%;
+  transform:rotate(18deg);
+  filter:drop-shadow(0 0 8px rgba(255,220,120,.75));
+  animation:pathPulse 1.6s infinite alternate;
+}
+
+.hotspot,
+.map-label{
   position:absolute;
   z-index:10;
   background:transparent;
@@ -155,20 +252,40 @@ button{
   position:absolute;
   left:50%;
   top:50%;
-  width:42%;
-  height:42%;
+  width:46%;
+  height:46%;
   transform:translate(-50%,-50%);
   border-radius:50%;
   background:radial-gradient(circle,rgba(0,245,255,1),rgba(0,180,255,.45),transparent 72%);
-  box-shadow:0 0 18px rgba(0,245,255,.85),0 0 40px rgba(0,180,255,.6);
-  animation:glow 1.5s infinite alternate;
+  box-shadow:0 0 18px rgba(0,245,255,.85),0 0 42px rgba(0,180,255,.6);
+  animation:glow 1.4s infinite alternate;
 }
 
-.hotspot span{
+.hotspot::after{
+  content:"!";
+  position:absolute;
+  left:50%;
+  top:-12px;
+  width:28px;
+  height:28px;
+  transform:translateX(-50%);
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  color:#3d2608;
+  background:linear-gradient(180deg,#fff7bc,#f7c84f);
+  border:2px solid #fff2b7;
+  font-weight:900;
+  box-shadow:0 0 18px rgba(255,220,120,.8);
+  animation:noticeJump 1.2s ease-in-out infinite;
+}
+
+.hotspot span,
+.map-label{
   position:absolute;
   left:50%;
   top:82%;
-  width:180px;
+  width:190px;
   transform:translateX(-50%);
   text-align:center;
   white-space:nowrap;
@@ -176,45 +293,24 @@ button{
   text-shadow:0 3px 0 #000,0 0 8px rgba(255,255,255,.35),0 4px 10px rgba(0,0,0,.8);
 }
 
-.map-name{
-  display:block;
-  font-size:24px;
-  font-weight:900;
-  line-height:1.2;
-}
+.map-name{display:block;font-size:20px;font-weight:900}
+.map-date{display:block;margin-top:6px;font-size:15px;font-weight:900;font-style:normal}
 
-.map-date{
-  display:block;
-  margin-top:6px;
-  font-size:18px;
-  font-weight:900;
-  line-height:1.2;
-}
+.hotspot:hover{z-index:40}
+.hotspot:hover::before{background:radial-gradient(circle,rgba(255,241,120,1),rgba(255,150,0,.55),transparent 72%);box-shadow:0 0 24px rgba(255,231,129,.95),0 0 54px rgba(255,150,0,.75)}
+.hotspot:hover span{transform:translateX(-50%) translateY(-6px)}
 
-.grass{
-  left:20.4%;
-  top:51%;
-  width:130px;
-  height:130px;
-}
+.grass{left:25%;top:48%;width:130px;height:130px}
+.second{left:47%;top:68%;width:130px;height:130px}
 
-.mother-event{
-  left:34%;
-  top:58%;
-  width:60px;
-  height:60px;
-  z-index:15;
-}
+.mother-event{left:36.8%;top:49%;width:60px;height:60px;z-index:10;filter:grayscale(.35) brightness(.95);opacity:.88}
+.grass-event{left:29.8%;top:65%;width:60px;height:60px;z-index:15}
 
-.grass-event{
-  left:24%;
-  top:78%;
-  width:60px;
-  height:60px;
-  z-index:15;
-}
+.mother-event::after,
+.grass-event::after{content:""}
 
-.mother-event::before,.grass-event::before{
+.mother-event::before,
+.grass-event::before{
   content:"";
   position:absolute;
   left:50%;
@@ -224,12 +320,12 @@ button{
   transform:translateX(-50%);
   background:linear-gradient(180deg,#6a5134,#2c1e10);
   border-radius:4px;
-  box-shadow:0 3px 5px rgba(0,0,0,.4);
   animation:none;
+  box-shadow:none;
 }
 
-.mother-event::after,.grass-event::after{
-  content:"";
+.mother-event .flag,
+.grass-event .flag{
   position:absolute;
   left:50%;
   top:18%;
@@ -237,73 +333,109 @@ button{
   height:20px;
   transform:translateX(2px);
   clip-path:polygon(0 0,100% 0,80% 50%,100% 100%,0 100%);
-  border-radius:3px 0 0 3px;
-  box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 1px 2px rgba(255,255,255,.3);
+  animation:flagWave 1.2s ease-in-out infinite;
 }
 
-.mother-event::after{
-  background:linear-gradient(135deg,#ff7272 0%,#b51f1f 100%);
-}
+.mother-event .flag{background:linear-gradient(135deg,#ff7272,#b51f1f)}
+.grass-event .flag{background:linear-gradient(135deg,#7cff72,#1f8b2c)}
 
-.grass-event::after{
-  background:linear-gradient(135deg,#7cff72 0%,#1f8b2c 100%);
-}
-
+.mother-event span,.grass-event span{top:92%;width:180px}
 .mother-event span{
-  top:92%;
-  width:120px;
-  color:#ffc0cb;
-}
+  width:140px;
 
-.grass-event span{
-  top:92%;
-  width:160px;
-  color:#d9ffbf;
-}
+  padding:0;
 
-.mother-event .map-name,.grass-event .map-name{
+  color:#fff4dc;
+
+  background:transparent;
+  border:none;
+  border-radius:0;
+  box-shadow:none;
+
+  text-shadow:
+    0 2px 0 #000,
+    0 0 6px rgba(255,255,255,.35),
+    0 3px 8px rgba(0,0,0,.95);
+}
+.mother-event span::before{
+  content:"已結束";
+  display:inline-block;
+  margin-bottom:3px;
+  padding:2px 8px;
+  border-radius:999px;
+  color:#fff8e8;
+  background:rgba(60,52,42,.72);
+  border:1px solid rgba(255,240,200,.55);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:1px;
+  transform:rotate(-5deg);
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.35);
+}
+.mother-event::after{
+  content:"✓";
+  position:absolute;
+  right:-8px;
+  top:-8px;
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  color:#2f2f2f;
+  background:linear-gradient(180deg,#eeeeee,#999999);
+  border:2px solid #f4f4f4;
   font-size:16px;
+  font-weight:900;
+  box-shadow:0 0 12px rgba(255,255,255,.35),0 5px 10px rgba(0,0,0,.45);
 }
-
-.mother-event .map-date,.grass-event .map-date{
-  font-size:12px;
-  margin-top:2px;
-}
+.mother-event:hover::before{box-shadow:none}
+.mother-event:hover span{transform:translateX(-50%)}
+.grass-event span{color:#7cff72}
+.mother-event .map-name,.grass-event .map-name{font-size:15px}
+.mother-event .map-name{color:#fff2d2;letter-spacing:1px}
+.mother-event .map-date{color:#fff7e8}
+.mother-event .map-date,.grass-event .map-date{font-size:10px}
 
 .map-label{
-  position:absolute;
   z-index:12;
-  width:180px;
-  transform:translate(-50%,-50%);
-  text-align:center;
-  background:transparent;
   color:#111;
   text-shadow:0 1px 0 rgba(255,255,255,.6),0 2px 4px rgba(255,255,255,.35);
+  opacity:.72;
+  cursor:not-allowed;
+}
+.third-label{left:70%;top:40%}
+.third-label::before{
+  content:"🔒";
+  display:block;
+  font-size:28px;
+  margin-bottom:4px;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
 }
 
-.third-label{
-  left:79.4%;
-  top:54%;
+.back-btn,.close-btn{
+  padding:12px 32px;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:3px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#7f9443 0%,#415425 100%);
+  border:3px solid #d7c57a;
+  border-radius:999px;
+  box-shadow:0 0 16px rgba(255,220,120,.35),0 8px 0 #263318,0 14px 24px rgba(0,0,0,.45);
+  text-shadow:0 2px 0 #000;
 }
 
-.second-label{
-  left:48.6%;
-  top:77%;
-}
+.back-btn{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);z-index:80}
+.close-btn{margin-top:30px}
+.back-btn:active,.close-btn:active{transform:translateX(-50%) translateY(5px);box-shadow:0 0 12px rgba(255,220,120,.3),0 3px 0 #263318,0 8px 18px rgba(0,0,0,.4)}
+.close-btn:active{transform:translateY(5px)}
 
 /* 任務頁 */
-.quest-bg{
-  position:fixed;
-  inset:0;
-}
-
-.quest-bg img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  opacity:.5;
-  filter:brightness(.65);
-}
+.quest-bg{position:fixed;inset:0;background:#000}
+.quest-bg img{width:100%;height:100%;object-fit:cover;opacity:.55;filter:brightness(.62) blur(1px) saturate(1.05)}
+.quest-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,rgba(0,0,0,.05),rgba(0,0,0,.75) 82%)}
 
 .quest-menu{
   position:absolute;
@@ -315,11 +447,25 @@ button{
 }
 
 .quest-menu h1{
-  margin:0 0 36px;
-  font-size:56px;
+  margin:0 0 22px;
+  font-size:clamp(34px,5vw,56px);
   letter-spacing:8px;
   color:#fff;
   text-shadow:0 4px 0 #4b2a10,0 8px 18px rgba(0,0,0,.75);
+}
+
+.quest-subtitle{
+  margin:0 auto 28px;
+  width:max-content;
+  max-width:90%;
+  padding:8px 18px;
+  color:#fff3b9;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,230,160,.45);
+  border-radius:999px;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:2px;
 }
 
 .quest-options{
@@ -329,17 +475,44 @@ button{
 }
 
 .quest-option{
-  min-height:190px;
-  padding:28px 18px;
-  background:rgba(246,225,175,.96);
+  position:relative;
+  overflow:hidden;
+  min-height:210px;
+  padding:26px 18px;
+  background:linear-gradient(180deg,rgba(255,240,205,.98) 0%,rgba(246,225,175,.96) 45%,rgba(226,197,125,.96) 100%);
   border:4px double #3a230c;
+  border-radius:24px;
   box-shadow:0 16px 36px rgba(0,0,0,.55),inset 0 0 28px rgba(116,71,22,.25);
-  font-size:30px;
+  font-size:28px;
   font-weight:900;
   line-height:1.35;
   color:#6f1d1d;
+  transition:transform .22s ease,box-shadow .22s ease,filter .22s ease;
+  transform-origin:center;
 }
 
+.quest-option .icon{display:block;font-size:44px;margin-bottom:14px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.18))}
+.quest-option .difficulty{display:block;margin-top:12px;font-size:14px;color:#5f3a13;letter-spacing:1px}
+
+.quest-option::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.35) 50%,transparent 80%);
+  opacity:0;
+  transform:translateX(-120%);
+  transition:all .45s ease;
+}
+
+.quest-option:hover{
+  transform:scale(1.08) translateY(-6px);
+  box-shadow:0 24px 52px rgba(0,0,0,.7),0 0 28px rgba(255,220,120,.85),inset 0 0 36px rgba(116,71,22,.32);
+  filter:brightness(1.08);
+}
+.quest-option:hover::before{opacity:1;transform:translateX(120%)}
+.quest-option:active{transform:scale(1.03) translateY(-2px)}
+
+/* 任務卡 */
 .task-card{
   position:absolute;
   left:50%;
@@ -348,310 +521,920 @@ button{
   max-height:82dvh;
   overflow-y:auto;
   transform:translate(-50%,-50%);
-  padding:72px 56px 46px;
+  padding:64px 56px 44px;
   text-align:center;
-  background:linear-gradient(180deg,rgba(248,235,197,.98),rgba(241,223,177,.98));
+  background:linear-gradient(180deg,rgba(248,235,197,.99),rgba(241,223,177,.99));
   border:4px solid #7c5a2d;
   border-radius:28px;
   box-shadow:0 20px 48px rgba(0,0,0,.55),inset 0 0 24px rgba(140,100,40,.18);
-  box-sizing:border-box;
+  animation:cardPop .36s cubic-bezier(.2,1.2,.3,1) both;
 }
 
-.task-card h1{
-  margin:0 0 30px;
-  font-size:60px;
-  letter-spacing:6px;
-  color:#496f34;
-}
-
-.task-card p,.task-card li{
-  font-size:32px;
+.task-card::before{
+  content:"任務卷軸";
+  position:absolute;
+  left:50%;
+  top:18px;
+  transform:translateX(-50%);
+  padding:6px 18px;
+  border-radius:999px;
+  background:#6d4421;
+  color:#ffe6a0;
+  font-size:15px;
   font-weight:900;
-  line-height:1.8;
-  color:#1d1207;
+  letter-spacing:3px;
 }
 
-.task-card ul{
-  margin:0;
-  padding:0;
-  list-style:none;
-}
+.task-card h1{margin:0 0 26px;font-size:clamp(36px,5.4vw,60px);letter-spacing:5px;color:#496f34}
+.task-card p,.task-card li{font-size:clamp(22px,3vw,32px);font-weight:900;line-height:1.8;color:#1d1207}
+.task-card ul{list-style:none;padding:0;margin:0}
+.task-card li::before{content:"✓ ";color:#496f34}
 
 .reward{
-  margin:34px auto 0;
+  margin:30px auto 0;
   padding:20px 34px;
   width:fit-content;
   max-width:100%;
-  font-size:34px;
+  font-size:clamp(22px,3.2vw,34px);
   font-weight:900;
-  line-height:1.6;
   color:#6a3911;
-  background:linear-gradient(180deg,#f6e8ae,#e3c96d);
+  background:linear-gradient(180deg,#fff2b7,#e3c96d);
+  border:3px solid #8b601f;
   border-radius:999px;
+  box-shadow:0 10px 24px rgba(0,0,0,.2), inset 0 0 16px rgba(255,255,255,.35);
+}
+.reward strong{color:#b12c1d}
+
+/* 部室加碼獎：部門人數對應達標率表格 */
+.rate-table{
+  width:min(560px,100%);
+  margin:24px auto 30px;
+  border-collapse:collapse;
+  overflow:hidden;
+  border-radius:18px;
+  box-shadow:0 12px 28px rgba(0,0,0,.18), inset 0 0 12px rgba(255,255,255,.25);
 }
 
-.reward strong{color:#b12c1d;}
+.rate-table thead th{
+  background:#7b4b2d;
+  color:#fff7dc;
+  padding:18px 14px;
+  font-size:clamp(19px,2.5vw,24px);
+  border:2px solid rgba(255,255,255,.45);
+  letter-spacing:2px;
+}
+
+.rate-table tbody td{
+  padding:18px 14px;
+  text-align:center;
+  font-size:clamp(21px,3vw,26px);
+  font-weight:900;
+  color:#1f140b;
+  background:rgba(255,250,241,.96);
+  border:2px solid rgba(91,53,20,.12);
+}
+
+.rate-table tbody tr:nth-child(even) td{background:#f7ecd0}
+.rate-table tbody td:last-child{color:#b12c1d}
+
+.department-note{
+  margin:12px auto 0;
+  max-width:680px;
+  font-size:clamp(18px,2.2vw,22px)!important;
+  line-height:1.7!important;
+  color:#7a4a1f!important;
+}
+
+
+/* 聯盟挑戰賽：兩段式任務面板 */
+.alliance-board{
+  width:min(780px,100%);
+  margin:18px auto 0;
+  display:grid;
+  gap:16px;
+  text-align:left;
+}
+
+.alliance-hero{
+  position:relative;
+  overflow:hidden;
+  padding:22px 26px;
+  border-radius:28px;
+  color:#fff8da;
+  background:
+    radial-gradient(circle at 88% 20%,rgba(255,229,130,.36),transparent 30%),
+    linear-gradient(135deg,#6f4325 0%,#2f1b0d 100%);
+  border:3px solid #e7c66f;
+  box-shadow:0 16px 34px rgba(0,0,0,.28), inset 0 0 28px rgba(255,220,120,.12);
+}
+
+.alliance-hero::after{
+  content:"";
+  position:absolute;
+  right:-26px;
+  bottom:-42px;
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  background:rgba(255,255,255,.08);
+}
+
+.alliance-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,232,150,.35);
+  color:#ffe88c;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.alliance-hero h2{
+  position:relative;
+  z-index:1;
+  margin:0;
+  color:#fff7dc;
+  font-size:clamp(30px,4.2vw,48px);
+  line-height:1.12;
+  letter-spacing:3px;
+  text-shadow:0 3px 0 rgba(0,0,0,.55);
+}
+
+.alliance-hero h2 strong{
+  color:#ffe88c;
+  font-size:1.12em;
+}
+
+.alliance-mini-note{
+  position:relative;
+  z-index:1;
+  margin-top:10px;
+  color:rgba(255,248,218,.9);
+  font-size:clamp(16px,2vw,20px)!important;
+  line-height:1.45!important;
+}
+
+.alliance-result-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+
+.alliance-status-card{
+  position:relative;
+  overflow:hidden;
+  padding:0;
+  border-radius:26px;
+  background:linear-gradient(180deg,rgba(255,250,232,.98),rgba(239,216,164,.97));
+  border:3px solid rgba(123,75,45,.65);
+  box-shadow:0 12px 26px rgba(0,0,0,.18), inset 0 0 18px rgba(128,80,28,.12);
+}
+
+.alliance-status-card.success{
+  border-color:#8a8f3c;
+}
+
+.alliance-status-card.fail{
+  background:linear-gradient(180deg,#fff2eb,#e8c3a9);
+  border-color:#b65b35;
+}
+
+.alliance-status-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px 18px;
+  color:#fff7dc;
+  background:linear-gradient(180deg,#8f5a2f,#553013);
+  border-bottom:2px solid rgba(255,230,160,.45);
+}
+
+.alliance-status-card.success .alliance-status-head{
+  background:linear-gradient(180deg,#71803b,#3e4f24);
+}
+
+.alliance-status-card.fail .alliance-status-head{
+  background:linear-gradient(180deg,#a85835,#6d2d1e);
+}
+
+.alliance-status-icon{
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:16px;
+  background:rgba(0,0,0,.18);
+  border:2px solid rgba(255,232,150,.55);
+  font-size:27px;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.08);
+}
+
+.alliance-status-title{
+  font-size:clamp(24px,3vw,32px);
+  font-weight:900;
+  letter-spacing:2px;
+  text-shadow:0 2px 0 rgba(0,0,0,.45);
+}
+
+.alliance-status-sub{
+  margin-top:3px;
+  font-size:clamp(14px,1.7vw,17px);
+  font-weight:900;
+  color:rgba(255,248,218,.86);
+}
+
+.alliance-rewards{
+  display:grid;
+  gap:10px;
+  padding:16px;
+}
+
+.alliance-reward-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.48);
+  border:1px solid rgba(91,53,20,.14);
+}
+
+.alliance-reward-label{
+  color:#3b2815;
+  font-size:clamp(17px,2vw,21px);
+  font-weight:900;
+  line-height:1.35;
+}
+
+.alliance-reward-value{
+  min-width:108px;
+  text-align:right;
+  color:#b12c1d;
+  font-size:clamp(24px,3.2vw,36px);
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.alliance-status-card.success .alliance-reward-value{
+  color:#496f34;
+}
+
+.alliance-status-card.fail .alliance-reward-value{
+  color:#b12c1d;
+}
+
+.alliance-flow{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:12px 14px;
+  border-radius:20px;
+  color:#fff8da;
+  background:rgba(72,45,22,.9);
+  border:1px solid rgba(255,230,160,.45);
+  font-size:clamp(16px,2vw,20px);
+  font-weight:900;
+  text-align:center;
+}
+
+.alliance-flow span{
+  color:#ffe88c;
+}
+
+@media (max-width:760px){
+  .alliance-result-grid{grid-template-columns:1fr}
+  .alliance-reward-row{align-items:flex-start;flex-direction:column}
+  .alliance-reward-value{text-align:left}
+}
+
+/* popup */
+.popup-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:9998;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(3px);
+}
 
 .popup{
   position:fixed;
   left:50%;
   top:50%;
   width:min(720px,82vw);
-  max-height:82dvh;
-  overflow-y:auto;
   transform:translate(-50%,-50%);
   z-index:9999;
   padding:42px;
   text-align:center;
-  background:linear-gradient(180deg,rgba(252,243,214,.98),rgba(237,220,178,.98));
+  background:linear-gradient(180deg,rgba(252,243,214,.99),rgba(237,220,178,.99));
   border:4px solid #7c5a2d;
   border-radius:20px;
   box-shadow:0 18px 42px rgba(0,0,0,.55);
-  box-sizing:border-box;
+  animation:cardPop .3s cubic-bezier(.2,1.2,.3,1) both;
 }
 
-.popup h2{
-  margin:0 0 18px;
-  font-size:46px;
-  color:#496f34;
-}
+.popup h2{margin:0 0 18px;font-size:clamp(32px,5vw,46px);color:#496f34}
+.popup p{margin:0;font-size:clamp(21px,3vw,28px);font-weight:900;line-height:1.8;color:#2c1a0b}
+.popup strong{color:#b12c1d}
 
-.popup p{
-  margin:0;
-  font-size:28px;
+.toast{
+  position:fixed;
+  left:50%;
+  top:24px;
+  z-index:10000;
+  transform:translateX(-50%) translateY(-120px);
+  padding:14px 24px;
+  color:#fff7cf;
+  background:rgba(24,36,22,.94);
+  border:2px solid #f7d56a;
+  border-radius:999px;
+  box-shadow:0 12px 28px rgba(0,0,0,.45),0 0 18px rgba(255,220,120,.35);
+  font-size:18px;
   font-weight:900;
-  line-height:1.8;
-  color:#2c1a0b;
+  letter-spacing:2px;
+  text-shadow:0 2px 0 #000;
+  transition:transform .35s ease;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* 手機直向提示 */
+.rotate-tip{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:20000;
+  place-items:center;
+  padding:28px;
+  text-align:center;
+  color:#fff6c9;
+  background:#050705;
+  font-size:24px;
+  font-weight:900;
+  line-height:1.6;
 }
 
-.popup strong{color:#b12c1d;}
-
-@keyframes glow{
-  from{transform:translate(-50%,-50%) scale(.85);opacity:.65;}
-  to{transform:translate(-50%,-50%) scale(1.18);opacity:1;}
+@media (orientation:portrait) and (max-width:900px){
+  .rotate-tip{display:grid}
 }
 
-@keyframes magicGlow{
-  0%,100%{box-shadow:0 0 12px rgba(255,220,120,.45),0 10px 24px rgba(0,0,0,.55);}
-  50%{box-shadow:0 0 28px rgba(255,220,120,.95),0 16px 36px rgba(0,0,0,.7);}
+@media (max-width:760px){
+  .quest-options{grid-template-columns:1fr;gap:16px}
+  .quest-option{min-height:132px;font-size:24px}
+  .hud{left:5%;top:4%;transform:scale(.86);transform-origin:left top}
+  .countdown-box{right:5%;top:4%;transform:scale(.86);transform-origin:right top}
 }
 
-@media (max-width:1024px) and (orientation:portrait){
-  .page{display:none!important;}
+@keyframes pageIn{from{opacity:0;filter:blur(4px)}to{opacity:1;filter:blur(0)}}
+@keyframes mapEnter{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
+@keyframes cardPop{from{opacity:0;transform:translate(-50%,-46%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes glow{from{transform:translate(-50%,-50%) scale(.85);opacity:.65}to{transform:translate(-50%,-50%) scale(1.18);opacity:1}}
+@keyframes magicGlow{0%,100%{box-shadow:0 0 12px rgba(255,220,120,.45),0 12px 0 #3e2b13,0 18px 32px rgba(0,0,0,.62)}50%{box-shadow:0 0 30px rgba(255,220,120,.95),0 12px 0 #3e2b13,0 24px 38px rgba(0,0,0,.72)}}
+@keyframes startBounce{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@keyframes noticeJump{0%,100%{translate:0 0}50%{translate:0 -6px}}
+@keyframes flagWave{0%,100%{transform:translateX(2px) skewY(0deg)}50%{transform:translateX(2px) skewY(-8deg)}}
+@keyframes pathPulse{from{opacity:.35}to{opacity:1}}
+@keyframes floatUp{from{transform:translateY(0) scale(.8);opacity:0}10%{opacity:1}to{transform:translateY(-110vh) scale(1.15);opacity:0}}
 
-  .rotate-tip{
-    position:fixed;
-    inset:0;
-    z-index:99999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:32px;
-    text-align:center;
-    line-height:1.8;
-    background:#14221c;
-    color:#fff6c9;
-    font-size:28px;
-    font-weight:900;
-  }
+/* 左上快捷入口：取代原本勇者狀態，只保留三個功能 icon */
+.quick-panel{
+  position:absolute;
+  left:7%;
+  top:4.8%;
+  z-index:75;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-/* 手機橫式：只縮小尺寸，不改座標 */
-@media (max-width:1024px) and (orientation:landscape){
-
-  .start-btn{
-    bottom:6%;
-    font-size:18px;
-    padding:10px 28px;
-  }
-
-  .back-btn{
-    bottom:8px;
-    font-size:13px;
-    padding:7px 18px;
-  }
-
-  .countdown-box{
-    right:8px;
-    top:8px;
-    padding:6px 10px;
-    transform:scale(.75);
-    transform-origin:top right;
-  }
-
-  .countdown-title{font-size:12px;}
-  #countdown{font-size:14px;}
-
-  .grass{
-    width:78px;
-    height:78px;
-  }
-
-  .mother-event,.grass-event{
-    width:38px;
-    height:38px;
-  }
-
-  .mother-event::before,.grass-event::before{
-    width:4px;
-    height:24px;
-  }
-
-  .mother-event::after,.grass-event::after{
-    width:20px;
-    height:12px;
-  }
-
-  .hotspot span{
-    width:120px;
-    top:86%;
-  }
-
-  .map-name{
-    font-size:13px;
-  }
-
-  .map-date{
-    font-size:10px;
-    margin-top:2px;
-  }
-
-  .mother-event .map-name,.grass-event .map-name{
-    font-size:10px;
-  }
-
-  .mother-event .map-date,.grass-event .map-date{
-    font-size:8px;
-  }
-
-  .map-label{
-    width:120px;
-  }
-
-  .quest-menu{
-    left:50%;
-    top:0;
-    bottom:54px;
-    width:86vw;
-    transform:translateX(-50%);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    overflow:hidden;
-  }
-
-  .quest-menu h1{
-    font-size:24px;
-    margin:0 0 10px;
-    letter-spacing:4px;
-  }
-
-  .quest-options{
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-  }
-
-  .quest-option{
-    min-height:68px;
-    padding:10px 8px;
-    font-size:16px;
-    line-height:1.25;
-  }
-
-  .task-card{
-    width:78vw;
-    max-height:76dvh;
-    padding:22px 24px 18px;
-  }
-
-  .task-card h1{
-    font-size:26px;
-    margin-bottom:10px;
-    letter-spacing:3px;
-  }
-
-  .task-card p,.task-card li{
-    font-size:16px;
-    line-height:1.45;
-  }
-
-  .reward{
-    font-size:16px;
-    margin-top:12px;
-    padding:10px 16px;
-  }
-
-  .popup{
-    width:72vw;
-    max-height:76dvh;
-    padding:20px;
-  }
-
-  .popup h2{
-    font-size:26px;
-    margin-bottom:12px;
-  }
-
-  .popup p{
-    font-size:17px;
-    line-height:1.5;
-  }
-
-  .close-btn{
-    margin-top:14px;
-    font-size:14px;
-    padding:8px 18px;
-  }
+.quick-btn{
+  position:relative;
+  width:54px;
+  height:54px;
+  min-width:0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff8da;
+  background:linear-gradient(180deg,#8b5a2a 0%,#4a2a12 100%);
+  border:3px solid #f7d56a;
+  border-radius:18px;
+  box-shadow:0 6px 0 #2a1608,0 10px 20px rgba(0,0,0,.35),0 0 12px rgba(255,220,120,.24);
+  text-shadow:0 2px 0 #000;
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:0;
+  transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;
 }
+
+.quick-btn span{
+  position:absolute;
+  left:50%;
+  top:calc(100% + 10px);
+  transform:translateX(-50%) translateY(-8px);
+  min-width:110px;
+  padding:10px 14px;
+  display:block;
+  margin:0;
+  color:#fff8da;
+  background:rgba(18,25,20,.96);
+  border:2px solid rgba(247,213,106,.92);
+  border-radius:12px;
+  box-shadow:0 10px 20px rgba(0,0,0,.45);
+  font-size:14px;
+  font-weight:900;
+  line-height:1.45;
+  letter-spacing:1px;
+  text-align:center;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+
+.quick-btn:hover span{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+.quick-btn:hover{
+  transform:translateY(-3px) scale(1.04);
+  filter:brightness(1.08);
+  box-shadow:0 8px 0 #2a1608,0 14px 24px rgba(0,0,0,.45),0 0 18px rgba(255,220,120,.48);
+}
+
+.quick-btn:active{
+  transform:translateY(3px);
+  box-shadow:0 3px 0 #2a1608,0 8px 16px rgba(0,0,0,.35);
+}
+
+.quick-btn.report{
+  background:linear-gradient(180deg,#496f34 0%,#263b1d 100%);
+}
+
+.quick-btn.report::after{
+  content:"NEW";
+  position:absolute;
+  right:-10px;
+  top:-10px;
+  padding:3px 7px;
+  color:#fff;
+  background:linear-gradient(180deg,#ff5b5b,#b81414);
+  border:2px solid #fff2b7;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:1px;
+  box-shadow:0 0 10px rgba(255,80,80,.7);
+  animation:newBadgePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes newBadgePulse{
+  0%,100%{transform:scale(1);filter:brightness(1)}
+  50%{transform:scale(1.12);filter:brightness(1.2)}
+}
+
+.doc-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:12000;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(4px);
+}
+
+.doc-modal{
+  position:fixed;
+  left:50%;
+  top:50%;
+  z-index:12001;
+  width:min(1080px,92vw);
+  height:min(760px,88dvh);
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:linear-gradient(180deg,#f9e9bf,#e7c982);
+  border:4px solid #7c5a2d;
+  border-radius:26px;
+  box-shadow:0 24px 60px rgba(0,0,0,.62),inset 0 0 24px rgba(140,100,40,.18);
+  animation:cardPop .32s cubic-bezier(.2,1.2,.3,1) both;
+}
+
+.doc-modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:16px 20px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#6d4421,#3a210f);
+  border-bottom:3px solid #d7c57a;
+  text-shadow:0 2px 0 #000;
+}
+
+.doc-modal-title{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  font-weight:900;
+  letter-spacing:2px;
+  font-size:24px;
+}
+
+.doc-modal-title small{
+  color:#ffe6a0;
+  font-size:13px;
+  letter-spacing:1px;
+}
+
+.doc-modal-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.doc-link,.doc-close{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:8px 14px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#7f9443,#415425);
+  border:2px solid #d7c57a;
+  border-radius:999px;
+  text-decoration:none;
+  font-size:15px;
+  font-weight:900;
+  text-shadow:0 1px 0 #000;
+}
+
+.doc-close{
+  background:linear-gradient(180deg,#9d5a3b,#5b2519);
+}
+
+.pdf-frame{
+  flex:1;
+  width:100%;
+  border:0;
+  background:#2b2118;
+}
+
+.report-body{
+  flex:1;
+  overflow:auto;
+  padding:20px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,232,140,.35),transparent 38%),
+    linear-gradient(180deg,#f7e7bd,#e8cf91);
+}
+
+.report-layout{
+  display:grid;
+  grid-template-columns:1.08fr .92fr;
+  gap:18px;
+  min-height:100%;
+}
+
+.report-card{
+  overflow:hidden;
+  border-radius:24px;
+  background:rgba(255,252,238,.92);
+  border:3px solid rgba(123,75,45,.55);
+  box-shadow:0 12px 28px rgba(0,0,0,.18),inset 0 0 16px rgba(128,80,28,.1);
+}
+
+.report-card-head{
+  padding:14px 16px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#6d4421,#3a210f);
+  border-bottom:2px solid rgba(255,230,160,.55);
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-shadow:0 2px 0 #000;
+}
+
+.report-image-wrap{
+  padding:14px;
+  min-height:360px;
+}
+
+.report-single-wrap{
+  display:grid;
+  place-items:center;
+}
+
+.report-image-wrap img{
+  width:100%;
+  max-height:560px;
+  object-fit:contain;
+  border-radius:16px;
+  background:#fff8e6;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+
+.report-scroll-stack{
+  max-height:62dvh;
+  overflow-y:auto;
+  display:grid;
+  gap:16px;
+  padding-right:8px;
+}
+
+.report-scroll-stack::-webkit-scrollbar{width:10px}
+.report-scroll-stack::-webkit-scrollbar-track{background:rgba(91,53,20,.14);border-radius:999px}
+.report-scroll-stack::-webkit-scrollbar-thumb{background:#8b601f;border-radius:999px}
+
+.report-shot{
+  padding:10px;
+  border-radius:20px;
+  background:rgba(255,255,255,.45);
+  border:1px solid rgba(91,53,20,.14);
+}
+
+.report-shot img{
+  display:block;
+  max-height:none;
+}
+
+.report-shot.missing{display:none}
+
+.report-group-note{
+  margin:0 0 12px;
+  padding:10px 14px;
+  border-radius:999px;
+  color:#5b3514;
+  background:rgba(255,232,150,.55);
+  border:1px solid rgba(123,75,45,.24);
+  font-size:15px;
+  font-weight:900;
+  text-align:center;
+}
+
+.report-empty{
+  padding:26px;
+  color:#6a3911;
+  font-size:20px;
+  font-weight:900;
+  line-height:1.7;
+  text-align:center;
+}
+
+.report-tabs{
+  display:grid;
+  gap:12px;
+  padding:14px;
+}
+
+.report-tab{
+  width:100%;
+  padding:16px;
+  text-align:left;
+  color:#5b3514;
+  background:linear-gradient(180deg,#fff8df,#ead29a);
+  border:2px solid rgba(123,75,45,.42);
+  border-radius:18px;
+  box-shadow:0 7px 0 rgba(91,53,20,.22),0 10px 18px rgba(0,0,0,.12);
+  font-weight:900;
+  transition:transform .18s ease,filter .18s ease;
+}
+
+.report-tab b{
+  display:block;
+  margin-bottom:5px;
+  font-size:19px;
+}
+
+.report-tab span{
+  color:#7a4a1f;
+  font-size:14px;
+}
+
+.report-tab.active{
+  color:#fff8da;
+  background:linear-gradient(180deg,#71803b,#3e4f24);
+  border-color:#ffe6a0;
+  text-shadow:0 1px 0 #000;
+}
+
+.report-tab.active span{color:#ffe6a0}
+.report-tab:hover{transform:translateY(-2px);filter:brightness(1.04)}
+
+.report-back-btn{
+  width:100%;
+  padding:12px 14px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#8b5a2a,#4a2a12);
+  border:2px solid #d7c57a;
+  border-radius:16px;
+  font-size:17px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-shadow:0 1px 0 #000;
+  box-shadow:0 6px 0 rgba(91,53,20,.28),0 10px 16px rgba(0,0,0,.12);
+}
+
+.report-back-btn:active{
+  transform:translateY(3px);
+  box-shadow:0 3px 0 rgba(91,53,20,.28),0 7px 12px rgba(0,0,0,.12);
+}
+
+
+.report-tip{
+  margin:14px;
+  padding:14px;
+  color:#fff8da;
+  background:rgba(72,45,22,.9);
+  border:1px solid rgba(255,230,160,.45);
+  border-radius:18px;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.6;
+}
+
+@media (max-width:980px){
+  .quick-panel{left:5%;top:4%;transform:scale(.88);transform-origin:left top}
+  .report-layout{grid-template-columns:1fr}
+  .doc-modal{height:90dvh}
+}
+
+@media (max-width:760px){
+  .quick-panel{left:5%;top:4%;transform:scale(.82);transform-origin:left top}
+  .quick-btn span{min-width:100px;font-size:12px}
+  .doc-modal-head{align-items:flex-start;flex-direction:column}
+  .doc-modal-actions{justify-content:flex-start}
+}
+
+
+/* 個人獎勵金查詢 */
+.reward-search-panel{
+  width:min(760px,100%);
+  margin:0 auto;
+  padding:22px;
+  border-radius:24px;
+  background:rgba(255,252,238,.92);
+  border:3px solid rgba(123,75,45,.55);
+  box-shadow:0 12px 28px rgba(0,0,0,.18),inset 0 0 16px rgba(128,80,28,.1);
+}
+
+.reward-search-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.reward-input{
+  width:min(360px,100%);
+  padding:14px 16px;
+  font-size:22px;
+  font-weight:900;
+  color:#5b3514;
+  background:#fff8df;
+  border:3px solid rgba(123,75,45,.55);
+  border-radius:16px;
+  outline:none;
+}
+
+.reward-input:focus{
+  box-shadow:0 0 0 4px rgba(247,213,106,.38);
+}
+
+.reward-search-btn{
+  padding:14px 24px;
+  color:#fff8da;
+  background:linear-gradient(180deg,#496f34 0%,#263b1d 100%);
+  border:3px solid #f7d56a;
+  border-radius:18px;
+  box-shadow:0 7px 0 #1c2b15,0 12px 20px rgba(0,0,0,.28);
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-shadow:0 2px 0 #000;
+}
+
+.reward-search-btn:active{
+  transform:translateY(4px);
+  box-shadow:0 3px 0 #1c2b15,0 8px 14px rgba(0,0,0,.25);
+}
+
+.reward-result{
+  margin-top:24px;
+  padding:20px;
+  min-height:92px;
+  color:#5b3514;
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(91,53,20,.16);
+  border-radius:20px;
+  font-size:21px;
+  font-weight:900;
+  line-height:1.75;
+}
+
+.reward-total{
+  margin-top:16px;
+  padding:18px 22px;
+  color:#6a3911;
+  background:linear-gradient(180deg,#fff2b7,#e3c96d);
+  border:3px solid #8b601f;
+  border-radius:22px;
+  font-size:28px;
+}
+
+.reward-total strong{
+  color:#b12c1d;
+  font-size:1.22em;
+}
+
+.reward-detail-table{
+  width:100%;
+  margin-top:14px;
+  border-collapse:collapse;
+  overflow:hidden;
+  border-radius:16px;
+}
+
+.reward-detail-table td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(91,53,20,.14);
+  background:rgba(255,248,223,.72);
+}
+
+.reward-detail-table td:last-child{
+  text-align:right;
+  color:#b12c1d;
+  white-space:nowrap;
+}
+
 </style>
 </head>
 
 <body>
-
-<div class="rotate-tip">
-  請將手機橫向觀看<br>
-  以獲得最佳冒險體驗
-</div>
+<div class="rotate-tip">請將手機轉為橫向<br>開啟完整冒險地圖體驗</div>
+<div class="toast" id="toast">任務已開啟</div>
+<div class="popup-backdrop hidden" id="popupBackdrop" onclick="closePopup()"></div>
 
 <div class="page" id="landing">
-  <img class="full-img" src="cover.png" alt="活動封面">
+  <img class="full-img" src="cover.png" alt="冒險地圖活動封面" />
+  <div class="landing-vignette"></div>
+  <div class="particles" id="landingParticles"></div>
   <button class="start-btn" onclick="goMap()">冒險開始</button>
 </div>
 
 <div class="page hidden" id="mapPage">
   <div class="map-wrap">
-    <div class="map-stage">
-      <img class="map-img" src="grass-map.png" alt="冒險地圖">
+    <div class="particles" id="mapParticles"></div>
 
-      <button class="hotspot grass" onclick="goGrassMenu()">
+    <div class="map-stage">
+      <img class="map-img" src="grass-map.png" alt="活動冒險地圖" />
+      <div class="map-path"></div>
+
+      <button class="hotspot grass" onclick="goGrassMenu()" aria-label="進入草原地圖任務">
         <span>
           <strong class="map-name">草原地圖</strong>
           <em class="map-date">05/01~05/21</em>
         </span>
       </button>
 
-      <button class="hotspot grass-event" onclick="showGrassEvent()">
+      <button class="hotspot second" onclick="goSecondMenu()" aria-label="進入市集地圖任務">
+        <span>
+          <strong class="map-name">市集地圖</strong>
+          <em class="map-date">05/22~06/10</em>
+        </span>
+      </button>
+
+      <button class="hotspot grass-event" onclick="showGrassEvent()" aria-label="查看草原快閃活動">
+        <b class="flag"></b>
         <span>
           <strong class="map-name">草原快閃</strong>
           <em class="map-date">05/14~05/21</em>
         </span>
       </button>
 
-      <button class="hotspot mother-event" onclick="showMotherEvent()">
+      <button class="hotspot mother-event" onclick="showMotherEvent()" aria-label="查看母親節快閃活動">
+        <b class="flag"></b>
         <span>
           <strong class="map-name">母親節快閃</strong>
           <em class="map-date">05/10</em>
         </span>
       </button>
 
-      <button class="map-label third-label" onclick="showLocked('第三地圖')">
+      <button class="map-label third-label" onclick="showLockedMap()" aria-label="第三地圖尚未開放">
         <strong class="map-name">第三地圖</strong>
         <em class="map-date">06/11~06/30</em>
-      </button>
-
-      <button class="map-label second-label" onclick="showLocked('第二地圖')">
-        <strong class="map-name">第二地圖</strong>
-        <em class="map-date">05/22~06/10</em>
       </button>
     </div>
 
@@ -660,37 +1443,32 @@ button{
       <div id="countdown">計算中...</div>
     </div>
 
+    <div class="quick-panel" aria-label="活動資訊快捷入口">
+      <button class="quick-btn" onclick="openRules()" aria-label="活動簡章">📜<span>活動簡章<br>Rules</span></button>
+      <button class="quick-btn report" onclick="openReportCenter()" aria-label="戰報中心">📊<span>戰報中心<br>Reports</span></button>
+      <button class="quick-btn" onclick="openRewardSearch()" aria-label="獎勵查詢">💰<span>獎勵查詢<br>Rewards</span></button>
+    </div>
+
     <button class="back-btn" onclick="backHome()">返回首頁</button>
   </div>
 </div>
 
 <div class="page hidden" id="grassMenuPage">
-  <div class="quest-bg">
-    <img src="grass-map.png" alt="">
-  </div>
-
+  <div class="quest-bg"><img src="grass-map.png" alt="任務背景" /></div>
   <div class="quest-menu">
-    <h1>草原地圖｜任務選擇</h1>
-
-    <div class="quest-options">
-      <button class="quest-option" onclick="showTask('personal')">個人冒險賽</button>
-      <button class="quest-option" onclick="showTask('department')">地圖推進<br>部室加碼獎</button>
-      <button class="quest-option" onclick="showTask('alliance')">聯盟挑戰賽</button>
-    </div>
+    <h1 id="questMenuTitle">草原地圖｜任務清單</h1>
+    <div class="quest-subtitle" id="questSubtitle">選擇任務，解鎖你的冒險獎勵</div>
+    <div class="quest-options" id="questOptions"></div>
   </div>
-
   <button class="back-btn" onclick="backToMap()">返回冒險地圖</button>
 </div>
 
 <div class="page hidden" id="taskPage">
-  <div class="quest-bg">
-    <img src="grass-map.png" alt="">
-  </div>
-
+  <div class="quest-bg"><img src="grass-map.png" alt="任務內容背景" /></div>
   <div class="task-card">
     <h1 id="taskTitle"></h1>
     <div id="taskContent"></div>
-    <button class="close-btn" onclick="backToGrassMenu()">返回任務選擇</button>
+    <button class="close-btn" onclick="backToCurrentMenu()">返回任務清單</button>
   </div>
 </div>
 
@@ -700,17 +1478,168 @@ button{
   <button class="close-btn" onclick="closePopup()">關閉</button>
 </div>
 
+<div class="doc-modal-backdrop hidden" id="rulesBackdrop" onclick="closeRules()"></div>
+<div class="doc-modal hidden" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="doc-modal-head">
+    <div class="doc-modal-title" id="rulesTitle">📜 活動簡章<small>若 PDF 無法內嵌顯示，請點選開啟新視窗</small></div>
+    <div class="doc-modal-actions">
+      <a class="doc-link" href="rules.pdf" target="_blank" rel="noopener">開啟 PDF</a>
+      <button class="doc-close" onclick="closeRules()">關閉</button>
+    </div>
+  </div>
+  <iframe class="pdf-frame" src="rules.pdf#toolbar=0&navpanes=0" title="活動簡章 PDF"></iframe>
+</div>
+
+<div class="doc-modal-backdrop hidden" id="reportBackdrop" onclick="closeReportCenter()"></div>
+<div class="doc-modal hidden" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <div class="doc-modal-head">
+    <div class="doc-modal-title" id="reportTitle">📊 戰報中心<small>部室＆聯盟火熱進行中！！</small></div>
+    <div class="doc-modal-actions">
+      <button class="doc-close" onclick="closeReportCenter()">關閉</button>
+    </div>
+  </div>
+  <div class="report-body">
+    <div class="report-layout">
+      <section class="report-card">
+        <div class="report-card-head" id="reportDisplayTitle">部室戰報</div>
+        <div class="report-image-wrap">
+          <div class="report-scroll-stack" id="departmentReportStack">
+            <p class="report-group-note">部室加碼獎共 5 張，向下滑動查看完整戰報</p>
+            <div class="report-shot"><img src="reports/grass/department-1.png" alt="部室戰報 1" onerror="this.closest('.report-shot').classList.add('missing')"></div>
+            <div class="report-shot"><img src="reports/grass/department-2.png" alt="部室戰報 2" onerror="this.closest('.report-shot').classList.add('missing')"></div>
+            <div class="report-shot"><img src="reports/grass/department-3.png" alt="部室戰報 3" onerror="this.closest('.report-shot').classList.add('missing')"></div>
+            <div class="report-shot"><img src="reports/grass/department-4.png" alt="部室戰報 4" onerror="this.closest('.report-shot').classList.add('missing')"></div>
+            <div class="report-shot"><img src="reports/grass/department-5.png" alt="部室戰報 5" onerror="this.closest('.report-shot').classList.add('missing')"></div>
+          </div>
+
+          <div class="report-single-wrap hidden" id="singleReportWrap">
+            <img id="reportImage" src="reports/grass/alliance-report.png" alt="聯盟賽戰報" onerror="handleReportImageError()" />
+          </div>
+
+          <div class="report-empty hidden" id="reportEmpty">
+            戰報尚未更新。
+          </div>
+        </div>
+      </section>
+
+      <aside class="report-card">
+        <div class="report-card-head">選擇戰報</div>
+        <div class="report-tabs" id="reportTabs"></div>
+        <div class="report-tip">
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<div class="doc-modal-backdrop hidden" id="rewardBackdrop" onclick="closeRewardSearch()"></div>
+<div class="doc-modal hidden" id="rewardModal" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+  <div class="doc-modal-head">
+    <div class="doc-modal-title" id="rewardTitle">💰 個人獎勵金查詢<small>恭喜你完成草原地圖，市集地圖一起累積更多的獎勵吧！！</small></div>
+    <div class="doc-modal-actions">
+      <button class="doc-close" onclick="closeRewardSearch()">關閉</button>
+    </div>
+  </div>
+
+  <div class="report-body">
+    <div class="reward-search-panel">
+      <div class="reward-search-row">
+        <input class="reward-input" id="rewardKeywordInput" placeholder="請輸入姓名或集團員編" autocomplete="off" onkeydown="if(event.key==='Enter') searchReward()">
+        <button class="reward-search-btn" onclick="searchReward()">查詢</button>
+      </div>
+      <div class="reward-result" id="rewardResult">資料尚未載入</div>
+    </div>
+  </div>
+</div>
+
 <script>
 const landing=document.getElementById("landing");
 const mapPage=document.getElementById("mapPage");
 const grassMenuPage=document.getElementById("grassMenuPage");
 const taskPage=document.getElementById("taskPage");
 const popup=document.getElementById("popup");
-
+const popupBackdrop=document.getElementById("popupBackdrop");
 const popupTitle=document.getElementById("popupTitle");
 const popupText=document.getElementById("popupText");
 const taskTitle=document.getElementById("taskTitle");
 const taskContent=document.getElementById("taskContent");
+const questMenuTitle=document.getElementById("questMenuTitle");
+const questSubtitle=document.getElementById("questSubtitle");
+const questOptions=document.getElementById("questOptions");
+const countdown=document.getElementById("countdown");
+const toast=document.getElementById("toast");
+const rulesModal=document.getElementById("rulesModal");
+const rulesBackdrop=document.getElementById("rulesBackdrop");
+const reportModal=document.getElementById("reportModal");
+const reportBackdrop=document.getElementById("reportBackdrop");
+const reportImage=document.getElementById("reportImage");
+const reportEmpty=document.getElementById("reportEmpty");
+const reportDisplayTitle=document.getElementById("reportDisplayTitle");
+const deptReportTab=document.getElementById("deptReportTab");
+const allianceReportTab=document.getElementById("allianceReportTab");
+const rewardBackdrop=document.getElementById("rewardBackdrop");
+const rewardModal=document.getElementById("rewardModal");
+const rewardResult=document.getElementById("rewardResult");
+const rewardKeywordInput=document.getElementById("rewardKeywordInput");
+
+let currentMap="grass";
+let toastTimer=null;
+let audioReady=false;
+let audioCtx=null;
+
+function initParticles(targetId,count=28){
+  const box=document.getElementById(targetId);
+  if(!box) return;
+  box.innerHTML="";
+  for(let i=0;i<count;i++){
+    const p=document.createElement("i");
+    p.style.left=Math.random()*100+"%";
+    p.style.animationDuration=(5+Math.random()*7)+"s";
+    p.style.animationDelay=(-Math.random()*8)+"s";
+    p.style.opacity=.3+Math.random()*.7;
+    p.style.transform=`scale(${.7+Math.random()*1.4})`;
+    box.appendChild(p);
+  }
+}
+
+initParticles("landingParticles",34);
+initParticles("mapParticles",24);
+
+function unlockAudio(){
+  if(audioReady) return;
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  audioReady=true;
+}
+
+function sfx(type="click"){
+  if(!audioReady || !audioCtx) return;
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+  const now=audioCtx.currentTime;
+  const tones={click:520,open:720,back:330,reward:880,error:180};
+  osc.frequency.setValueAtTime(tones[type]||520,now);
+  if(type==="reward") osc.frequency.exponentialRampToValueAtTime(1320,now+.12);
+  if(type==="error") osc.frequency.exponentialRampToValueAtTime(120,now+.16);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(.08,now+.015);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+.16);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now+.18);
+}
+
+document.addEventListener("pointerdown",unlockAudio,{once:true});
+
+function showToast(text,type="open"){
+  toast.textContent=text;
+  toast.classList.add("show");
+  sfx(type);
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.remove("show"),1700);
+}
 
 function hideAll(){
   landing.classList.add("hidden");
@@ -718,118 +1647,564 @@ function hideAll(){
   grassMenuPage.classList.add("hidden");
   taskPage.classList.add("hidden");
   popup.classList.add("hidden");
+  popupBackdrop.classList.add("hidden");
 }
 
 function goMap(){
   hideAll();
   mapPage.classList.remove("hidden");
+  showToast("冒險地圖已開啟", "open");
 }
 
 function backHome(){
   hideAll();
   landing.classList.remove("hidden");
+  sfx("back");
 }
 
 function backToMap(){
   hideAll();
   mapPage.classList.remove("hidden");
+  showToast("返回世界地圖", "back");
+}
+
+function renderQuestOptions(map){
+  const isSecond=map==="second";
+  questOptions.innerHTML=`
+    <button class="quest-option" onclick="${isSecond ? "showSecondTask" : "showGrassTask"}('personal')">
+      <span class="icon">⚔️</span>
+      個人冒險賽
+      <span class="difficulty">推薦勇者：所有勇者</span>
+    </button>
+    <button class="quest-option" onclick="${isSecond ? "showSecondTask" : "showGrassTask"}('department')">
+      <span class="icon">🏰</span>
+      地圖推進<br>部室加碼獎
+      <span class="difficulty">推薦勇者：部室集結</span>
+    </button>
+    <button class="quest-option" onclick="${isSecond ? "showSecondTask" : "showGrassTask"}('alliance')">
+      <span class="icon">🛡️</span>
+      聯盟挑戰賽
+      <span class="difficulty">推薦勇者：聯盟戰隊</span>
+    </button>
+  `;
 }
 
 function goGrassMenu(){
+  currentMap="grass";
   hideAll();
   grassMenuPage.classList.remove("hidden");
+  questMenuTitle.textContent="草原地圖｜任務清單";
+  questSubtitle.textContent="第一章：累積步數，成為草原探索者";
+  renderQuestOptions("grass");
+  showToast("草原任務已解鎖", "open");
 }
 
-function backToGrassMenu(){
+function goSecondMenu(){
+  currentMap="second";
   hideAll();
   grassMenuPage.classList.remove("hidden");
+  questMenuTitle.textContent="市集地圖｜任務清單";
+  questSubtitle.textContent="第二章：每日挑戰，累積市集步數";
+  renderQuestOptions("second");
+  showToast("市集任務已開啟", "open");
 }
 
-function showTask(type){
+function backToCurrentMenu(){
+  if(currentMap==="second") goSecondMenu();
+  else goGrassMenu();
+}
+
+function openTask(title,html){
   hideAll();
   taskPage.classList.remove("hidden");
+  taskTitle.textContent=title;
+  taskContent.innerHTML=html;
 
+  // 每次打開任務卡時，都從最上方開始顯示，避免沿用上一張卡牌的捲動位置。
+  const taskCard=document.querySelector(".task-card");
+  if(taskCard) taskCard.scrollTop=0;
+  if(taskContent) taskContent.scrollTop=0;
+  window.scrollTo(0,0);
+
+  showToast("任務卷軸展開", "click");
+}
+
+
+function departmentRateTable(){
+  return `
+    <table class="rate-table">
+      <thead>
+        <tr>
+          <th>部門人數</th>
+          <th>達標率</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1 - 10 人</td><td>80%</td></tr>
+        <tr><td>11 - 30 人</td><td>70%</td></tr>
+        <tr><td>31 - 50 人</td><td>60%</td></tr>
+        <tr><td>51 人以上</td><td>50%</td></tr>
+      </tbody>
+    </table>
+    <p class="department-note">
+      達成率計算方式：<br>
+      各部室各地圖結算達標人數 ÷ 各部室各地圖最後一天人數
+    </p>
+  `;
+}
+
+function allianceBattleContent(map){
+  const isSecond=map==="second";
+  const mapName=isSecond ? "市集地圖" : "草原地圖";
+  const stepGoal=isSecond ? "1.1 萬步" : "1 萬步";
+  const icon=isSecond ? "🏙️" : "🌿";
+
+  return `
+    <div class="alliance-board">
+      <section class="alliance-hero">
+        <div class="alliance-kicker">${icon} ${mapName}｜聯盟挑戰賽</div>
+        <h2>每日平均達 <strong>${stepGoal}</strong></h2>
+        <p class="alliance-mini-note">先判斷是否達標，再依排名結算聯盟籌碼。</p>
+      </section>
+
+      <div class="alliance-result-grid">
+        <section class="alliance-status-card success">
+          <div class="alliance-status-head">
+            <div class="alliance-status-icon">🏆</div>
+            <div>
+              <div class="alliance-status-title">達標</div>
+              <div class="alliance-status-sub">聯盟完成本地圖步數門檻</div>
+            </div>
+          </div>
+
+          <div class="alliance-rewards">
+            <div class="alliance-reward-row">
+              <div class="alliance-reward-label">排名前 4 名</div>
+              <div class="alliance-reward-value">+200</div>
+            </div>
+            <div class="alliance-reward-row">
+              <div class="alliance-reward-label">未進前 4 名</div>
+              <div class="alliance-reward-value">+100</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="alliance-status-card fail">
+          <div class="alliance-status-head">
+            <div class="alliance-status-icon">⚠️</div>
+            <div>
+              <div class="alliance-status-title">未達標</div>
+              <div class="alliance-status-sub">聯盟未完成本地圖步數門檻</div>
+            </div>
+          </div>
+
+          <div class="alliance-rewards">
+            <div class="alliance-reward-row">
+              <div class="alliance-reward-label">排名第 5 - 8 名</div>
+              <div class="alliance-reward-value">-50</div>
+            </div>
+            <div class="alliance-reward-row">
+              <div class="alliance-reward-label">排名末 4 名</div>
+              <div class="alliance-reward-value">-100</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="alliance-flow">
+        初始籌碼：<span>每人 300 元</span>　｜　單位：<span>每人</span>
+      </div>
+    </div>
+  `;
+}
+
+function showGrassTask(type){
   if(type==="personal"){
-    taskTitle.textContent="個人冒險賽";
-    taskContent.innerHTML=`
-      <p>累積 20 萬步以上</p>
-      <div class="reward">即可獲得 <strong>200 元獎勵金</strong></div>
-    `;
+    openTask("個人冒險賽",`
+      <p>累積 <strong>20 萬步以上</strong></p>
+      <div class="reward">任務獎勵：<strong>200 元獎勵金</strong></div>
+    `);
   }
-
   if(type==="department"){
-    taskTitle.textContent="地圖推進部室加碼獎";
-    taskContent.innerHTML=`
-      <p>完成部室達標率</p>
-      <div class="reward">該部室達標的勇者即可獲得 <strong>400 元獎勵金</strong></div>
-    `;
+    openTask("地圖推進部室加碼獎",`
+      <p>完成部室達標率即可獲得加碼獎勵</p>
+      ${departmentRateTable()}
+      <div class="reward">達標勇者可獲得 <strong>400 元獎勵金</strong></div>
+    `);
+  }
+  if(type==="alliance"){
+    openTask("聯盟挑戰賽", allianceBattleContent("grass"));
+  }
+}
+
+function showSecondTask(type){
+  if(type==="personal"){
+    openTask("市集地圖｜個人冒險賽",`
+      <ul>
+        <li>平均每日 1.2 萬步以上</li>
+        <li>且每日都有步數紀錄</li>
+      </ul>
+      <div class="reward">任務獎勵：<strong>400 元獎勵金</strong></div>
+    `);
+  }
+  if(type==="department"){
+    openTask("市集地圖｜部室加碼獎",`
+      <p>完成部室達標率即可獲得加碼獎勵</p>
+      ${departmentRateTable()}
+      <div class="reward">達標勇者可獲得 <strong>600 元獎勵金</strong></div>
+    `);
+  }
+  if(type==="alliance"){
+    openTask("市集地圖｜聯盟挑戰賽", allianceBattleContent("second"));
+  }
+}
+
+
+function openRules(){
+  rulesBackdrop.classList.remove("hidden");
+  rulesModal.classList.remove("hidden");
+  showToast("活動簡章已開啟", "open");
+}
+
+function closeRules(){
+  rulesModal.classList.add("hidden");
+  rulesBackdrop.classList.add("hidden");
+  sfx("back");
+}
+
+const reportMaps=[
+  {
+    key:"grass",
+    title:"草原地圖",
+    icon:"🌿",
+    desc:"05/01~05/21",
+    reports:[
+      {key:"grassDepartment", title:"地圖推進部室加碼獎", icon:"🏰", desc:"人員分配＆部室達標率", type:"department", paths:[
+        "reports/grass/department-1.png",
+        "reports/grass/department-2.png",
+        "reports/grass/department-3.png",
+        "reports/grass/department-4.png",
+        "reports/grass/department-5.png"
+      ]},
+      {key:"grassAlliance", title:"聯盟挑戰賽", icon:"🛡️", desc:"聯盟達標率與排名", type:"single", src:"reports/grass/alliance-report.png"}
+    ]
+  },
+  {
+    key:"market",
+    title:"市集地圖",
+    icon:"🏙️",
+    desc:"05/22~06/10",
+    reports:[
+      {key:"marketDepartment", title:"地圖推進部室加碼獎", icon:"🏰", desc:"人員分配＆部室達標率", type:"department", paths:[
+        "reports/market/department-1.png",
+        "reports/market/department-2.png",
+        "reports/market/department-3.png",
+        "reports/market/department-4.png",
+        "reports/market/department-5.png"
+      ]},
+      {key:"marketAlliance", title:"聯盟挑戰賽", icon:"🛡️", desc:"聯盟達標率與排名", type:"single", src:"reports/market/alliance-report.png"}
+    ]
+  }
+];
+
+let currentReportMapKey="grass";
+let currentReportKey="";
+
+function getReportMap(key){
+  return reportMaps.find(map=>map.key===key) || reportMaps[0];
+}
+
+function renderReportMapTabs(){
+  const reportTabs=document.getElementById("reportTabs");
+  if(!reportTabs) return;
+
+  reportTabs.innerHTML=reportMaps.map(map=>`
+    <button class="report-tab ${map.key===currentReportMapKey ? "active" : ""}" onclick="selectReportMap('${map.key}')">
+      <b>${map.icon} ${map.title}</b>
+      <span>${map.desc}</span>
+    </button>
+  `).join("");
+}
+
+function renderReportTypeTabs(){
+  const reportTabs=document.getElementById("reportTabs");
+  if(!reportTabs) return;
+
+  const map=getReportMap(currentReportMapKey);
+
+  reportTabs.innerHTML=`
+    <button class="report-back-btn" onclick="backToReportMaps()">← 返回地圖選擇</button>
+    ${map.reports.map(item=>`
+      <button class="report-tab ${item.key===currentReportKey ? "active" : ""}" onclick="switchReport('${item.key}')">
+        <b>${item.icon} ${item.title}</b>
+        <span>${item.desc}</span>
+      </button>
+    `).join("")}
+  `;
+}
+
+function openReportCenter(){
+  reportBackdrop.classList.remove("hidden");
+  reportModal.classList.remove("hidden");
+  currentReportKey="";
+  reportDisplayTitle.textContent="請先選擇地圖";
+  showReportPlaceholder("請先從右側選擇地圖");
+  renderReportMapTabs();
+  showToast("戰報中心已開啟", "open");
+}
+
+function closeReportCenter(){
+  reportModal.classList.add("hidden");
+  reportBackdrop.classList.add("hidden");
+  sfx("back");
+}
+
+function selectReportMap(mapKey){
+  currentReportMapKey=mapKey;
+  currentReportKey="";
+  const map=getReportMap(mapKey);
+  reportDisplayTitle.textContent=`${map.title}｜請選擇戰報`;
+  showReportPlaceholder(`已選擇 ${map.title}，請在右側選擇部室加碼獎或聯盟挑戰賽戰報。`);
+  renderReportTypeTabs();
+  sfx("click");
+}
+
+function backToReportMaps(){
+  currentReportKey="";
+  reportDisplayTitle.textContent="請先選擇地圖";
+  showReportPlaceholder("請先從右側選擇地圖");
+  renderReportMapTabs();
+  sfx("back");
+}
+
+function showReportPlaceholder(text){
+  const departmentReportStack=document.getElementById("departmentReportStack");
+  const singleReportWrap=document.getElementById("singleReportWrap");
+  departmentReportStack.classList.add("hidden");
+  singleReportWrap.classList.add("hidden");
+  reportEmpty.classList.remove("hidden");
+  reportEmpty.innerHTML=text;
+}
+
+function switchReport(key){
+  const map=getReportMap(currentReportMapKey);
+  const item=map.reports.find(report=>report.key===key) || map.reports[0];
+  currentReportKey=item.key;
+  reportDisplayTitle.textContent=`${map.title}｜${item.title}`;
+
+  const departmentReportStack=document.getElementById("departmentReportStack");
+  const singleReportWrap=document.getElementById("singleReportWrap");
+
+  reportEmpty.classList.add("hidden");
+  reportEmpty.innerHTML=`
+    戰報尚未更新。
+  `;
+
+  if(item.type==="department"){
+    departmentReportStack.classList.remove("hidden");
+    singleReportWrap.classList.add("hidden");
+    departmentReportStack.innerHTML=(item.paths || []).map((path,index)=>`
+      <div class="report-shot"><img src="${path}?v=${Date.now()}" alt="${map.title} ${item.title} ${index+1}" onerror="this.closest('.report-shot').classList.add('missing')"></div>
+    `).join("");
+    const missingPath=document.getElementById("reportMissingPath");
+    if(missingPath) missingPath.textContent=(item.paths || []).join("、");
+  }else{
+    departmentReportStack.classList.add("hidden");
+    singleReportWrap.classList.remove("hidden");
+    reportImage.style.display="block";
+    reportImage.alt=`${map.title} ${item.title}`;
+    const missingPath=document.getElementById("reportMissingPath");
+    if(missingPath) missingPath.textContent=item.src;
+    reportImage.src=item.src + "?v=" + Date.now();
   }
 
-  if(type==="alliance"){
-    taskTitle.textContent="聯盟挑戰賽";
-    taskContent.innerHTML=`
-      <ul>
-        <li>該聯盟每人每日平均 1 萬步以上</li>
-        <li>且排名前 4 名</li>
-      </ul>
-      <div class="reward">該聯盟每位勇者即可獲得 <strong>200 元獎勵金</strong></div>
-    `;
-  }
+  renderReportTypeTabs();
+}
+
+function handleReportImageError(){
+  reportImage.style.display="none";
+  reportEmpty.classList.remove("hidden");
+}
+
+function openPopup(title,html,type="reward"){
+  popupTitle.textContent=title;
+  popupText.innerHTML=html;
+  popupBackdrop.classList.remove("hidden");
+  popup.classList.remove("hidden");
+  sfx(type);
 }
 
 function showMotherEvent(){
-  popupTitle.textContent="母親節快閃活動（已結束）";
-  popupText.innerHTML=
-    "母親節（05/10）當天<br>"+
-    "步數達 <strong>15,520 步</strong><br>"+
-    "即可獲得 <strong>100 元獎勵金</strong>";
-  popup.classList.remove("hidden");
+  openPopup("歷史活動｜母親節快閃活動",
+    "<strong>05/10</strong><br>當天步數達 <strong>15,520 步</strong><br>任務獎勵：<strong>100 元獎勵金</strong><br><span style='color:#666'>此任務目前不可再挑戰，僅供勇者回顧活動紀錄。</span>",
+    "back"
+  );
 }
 
 function showGrassEvent(){
-  popupTitle.textContent="草原地圖快閃活動";
-  popupText.innerHTML=
-    "前往任一公園、綠地或戶外草地空間進行步行活動，<br>"+
-    "且自拍一張照片上傳至 Forms<br>"+
-    "即可獲得 <strong>100 元獎勵金</strong>";
-  popup.classList.remove("hidden");
+  openPopup("草原地圖快閃活動",
+    "<strong>05/18-05/21</strong><br>前往任一公園、綠地或戶外草地空間進行步行活動，自拍一張照片並上傳至 Forms<br>任務獎勵：<strong>100 元獎勵金</strong>",
+    "reward"
+  );
 }
 
-function showLocked(name){
-  popupTitle.textContent=name+" 尚未開啟";
-  popupText.innerHTML=
-    "此區域仍被迷霧覆蓋。<br>"+
-    "請等待下一階段冒險開放！";
-  popup.classList.remove("hidden");
+function showLockedMap(){
+  openPopup("第三地圖尚未開放",
+    "新的冒險將於 <strong>06/11</strong> 解鎖<br>請先完成前方地圖任務，累積勇者步數！",
+    "error"
+  );
 }
 
 function closePopup(){
   popup.classList.add("hidden");
+  popupBackdrop.classList.add("hidden");
+  sfx("back");
 }
 
-const countdown=document.getElementById("countdown");
-const eventEndTime=new Date("2026-05-21T23:59:59").getTime();
 
+const REWARD_EXCEL_PATH="rewards/rewards.xlsx";
+let rewardData=[];
+let rewardLoadPromise=null;
+
+const rewardColumns=[
+  "早鳥獎",
+  "母親節快閃活動",
+  "草原地圖快閃活動",
+  "草原地圖-個人冒險賽",
+  "草原地圖-部室加碼獎",
+  "草原地圖-聯盟挑戰賽"
+];
+
+function toNumber(value){
+  if(value===undefined || value===null || value==="") return 0;
+  const n=Number(String(value).replace(/,/g,"").trim());
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatMoney(value){
+  return Number(value || 0).toLocaleString("zh-TW");
+}
+
+async function loadRewardExcel(){
+  if(rewardData.length>0) return rewardData;
+  if(rewardLoadPromise) return rewardLoadPromise;
+
+  rewardLoadPromise=fetch(REWARD_EXCEL_PATH,{cache:"no-store"})
+    .then(response=>{
+      if(!response.ok) throw new Error("Excel 檔案讀取失敗");
+      return response.arrayBuffer();
+    })
+    .then(arrayBuffer=>{
+      const workbook=XLSX.read(arrayBuffer,{type:"array"});
+      const sheet=workbook.Sheets[workbook.SheetNames[0]];
+      rewardData=XLSX.utils.sheet_to_json(sheet,{defval:""});
+      return rewardData;
+    })
+    .catch(error=>{
+      rewardLoadPromise=null;
+      throw error;
+    });
+
+  return rewardLoadPromise;
+}
+
+async function openRewardSearch(){
+  rewardBackdrop.classList.remove("hidden");
+  rewardModal.classList.remove("hidden");
+  rewardResult.innerHTML="資料載入中...";
+
+  try{
+    await loadRewardExcel();
+    rewardResult.innerHTML=`請輸入姓名或集團員編查詢目前累積的獎勵。`;
+    setTimeout(()=>rewardKeywordInput.focus(),120);
+    showToast("獎勵查詢已開啟","open");
+  }catch(error){
+    rewardResult.innerHTML=`無法讀取 <strong>${REWARD_EXCEL_PATH}</strong><br>請確認 Excel 檔名、路徑正確，且網頁是用 Live Server / 本機伺服器開啟。`;
+    sfx("error");
+  }
+}
+
+function closeRewardSearch(){
+  rewardModal.classList.add("hidden");
+  rewardBackdrop.classList.add("hidden");
+  sfx("back");
+}
+
+function getRowKey(row,key){
+  return String(row[key] ?? "").trim();
+}
+
+function findRewardRow(keyword){
+  const target=String(keyword || "").trim();
+  if(!target) return null;
+
+  return rewardData.find(row=>{
+    const empId=getRowKey(row,"集團員編");
+    const name=getRowKey(row,"姓名");
+    return empId===target || name===target;
+  });
+}
+
+async function searchReward(){
+  const keyword=rewardKeywordInput.value.trim();
+
+  if(!keyword){
+    rewardResult.innerHTML="請先輸入姓名或集團員編。";
+    sfx("error");
+    return;
+  }
+
+  try{
+    await loadRewardExcel();
+  }catch(error){
+    rewardResult.innerHTML=`無法讀取 <strong>${REWARD_EXCEL_PATH}</strong><br>請確認 Excel 檔名、路徑正確。`;
+    sfx("error");
+    return;
+  }
+
+  const row=findRewardRow(keyword);
+
+  if(!row){
+    rewardResult.innerHTML=`查無「${keyword}」，請確認姓名或集團員編是否輸入正確。`;
+    sfx("error");
+    return;
+  }
+
+  let total=0;
+  const detailRows=rewardColumns.map(col=>{
+    const value=toNumber(row[col]);
+    total+=value;
+    return `<tr><td>${col}</td><td>${formatMoney(value)} 元</td></tr>`;
+  }).join("");
+
+  rewardResult.innerHTML=`
+    <div>姓名：<strong>${row["姓名"] || "-"}</strong></div>
+    ${row["集團員編"] ? `<div>集團員編：<strong>${row["集團員編"]}</strong></div>` : ""}
+    <div>總步數：${formatMoney(toNumber(row["總步數"]))}</div>
+    <div>有步數天數：${formatMoney(toNumber(row["有步數天數"]))}</div>
+    <table class="reward-detail-table">${detailRows}</table>
+    <div class="reward-total">目前累積獎勵金：<strong>${formatMoney(total)}</strong> 元</div>
+  `;
+
+  sfx("reward");
+}
+
+const eventEndTime=new Date("2026-05-21T23:59:59+08:00").getTime();
 function updateCountdown(){
-  const now=new Date().getTime();
+  const now=Date.now();
   const distance=eventEndTime-now;
-
   if(distance<=0){
     countdown.textContent="活動已結束";
     return;
   }
-
   const days=Math.floor(distance/(1000*60*60*24));
   const hours=Math.floor((distance%(1000*60*60*24))/(1000*60*60));
   const minutes=Math.floor((distance%(1000*60*60))/(1000*60));
   const seconds=Math.floor((distance%(1000*60))/1000);
-
   countdown.textContent=`${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
 }
-
 setInterval(updateCountdown,1000);
 updateCountdown();
 </script>
-
 </body>
 </html>
